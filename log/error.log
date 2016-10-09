@@ -1,0 +1,7 @@
+2016/10/06 22:18:18 [error] 25203#25203: *1 directory index of "/usr/share/nginx/html/" is forbidden, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", host: "www.basic.com"
+2016/10/06 22:22:20 [error] 26228#26228: *1 directory index of "/usr/share/nginx/html/" is forbidden, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", host: "www.basic.com"
+2016/10/06 22:24:22 [error] 26754#26754: *1 directory index of "/usr/share/nginx/html/" is forbidden, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", host: "www.basic.com"
+2016/10/06 22:31:59 [error] 28553#28553: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: www.basic.com, request: "GET /index.php HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "www.basic.com"
+2016/10/06 22:33:31 [error] 28553#28553: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "www.basic.com"
+2016/10/06 22:34:18 [error] 28553#28553: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "www.basic.com"
+2016/10/06 22:38:00 [error] 28553#28553: *6 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: www.basic.com, request: "GET / HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "www.basic.com"
