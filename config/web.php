@@ -46,6 +46,29 @@ $config = [
                 ],
             ],
         ],
+        'ftp' => [
+            'class' => 'app\extensions\ftp\FtpComponent',
+            'host' => '172.16.40.250',
+            'username' => 'app',
+            'password' => 'baiyang',
+            'ssl' => false,
+            'timeout' => 90,
+            'port' => 21,
+            'autoConnect' => true,
+            'dir' => '',
+        ],
+
+        'ssh2' => [
+            'class' => 'app\extensions\ssh2\Ssh2',
+            'host' => '172.16.40.250',
+            'username' => 'app',
+            'password' => 'baiyang',
+            'port' => 22,
+            'pubkeyfile' => "C:/wamp/www/basic/web/id_rsa.pub",
+            'privkeyfile' => "C:/wamp/www/basic/web/App",
+            'autoConnect' => true,
+            'dir' => '',
+        ],
         'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [

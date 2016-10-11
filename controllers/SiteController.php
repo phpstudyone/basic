@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Redis;
+use app\components\RSA;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -50,7 +51,32 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
+    header ( "Content-type:text/html;charset=utf-8" );
+    $connection = ssh2_connect('172.16.40.250', 22, array('hostkey'=>'ssh-rsa'));
 
+    if (ssh2_auth_pubkey_file($connection, 'app',
+                             "C:/wamp/www/basic/web/id_rsa.pub",
+                             "C:/wamp/www/basic/web/App", 'baiyang')) {
+            echo "连接172.16.40.250:22成功";
+            $sftp = ssh2_sftp($connection);
+            if(ssh2_scp_recv($connection, '/var/www/html/web/Application/Shop/View/Public/error.html', './error.html')){
+                echo "接受文件成功";
+            }
+
+            if(ssh2_scp_send ($connection, './error.html', '/var/www/html/web/Application/Shop/View/Public/error1.html')){
+                echo "发送文件成功";
+            }
+
+        } else {
+        die('Public Key Hostbased Authentication Failed');
+    }die;
+
+
+
+
+        $ftp = Yii::$app->ftp;
+        var_dump($ftp);die;
+        phpinfo();die;
         $arr = RSA::createRsaKey();
         $myfile = fopen ( "rsa_public_key.pem", "w" ) or die ( "Unable to open file!" );
         fwrite ( $myfile, $arr ['publicKey'] );
