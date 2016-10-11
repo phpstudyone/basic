@@ -50,10 +50,17 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-        Redis::setCache('zhang','rihui');
-        var_dump(Redis::getCache('zhang'));
-        Redis::setCaches([' dai'=>'liu','lian'=>'tian']);
-        var_dump(Redis::getCaches(['zhang','dai','lian']));die;
+
+        $arr = RSA::createRsaKey();
+        $myfile = fopen ( "rsa_public_key.pem", "w" ) or die ( "Unable to open file!" );
+        fwrite ( $myfile, $arr ['publicKey'] );
+        fclose ( $myfile );
+
+        $myfile = fopen ( "rsa_private_key.pem", "w" ) or die ( "Unable to open file!" );
+        fwrite ( $myfile, $arr ['privateKey'] );
+        fclose ( $myfile );
+        print_r ( $arr );
+        die;
         return $this->render('index');
     }
 
