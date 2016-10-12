@@ -2,6 +2,7 @@
 
 namespace app\components;
 
+use app\components\ToolHandler;
 use Yii;
 use yii\base\Exception;
 

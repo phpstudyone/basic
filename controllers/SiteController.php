@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\components\Redis;
 use app\components\RSA;
+use app\components\SshUploadFile;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -49,6 +50,9 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionText(){
+        SshUploadFile::get(['Application/Shop/View/Public/error.html'],"c:/");die;
+    }
     public function actionIndex()
     {
     header ( "Content-type:text/html;charset=utf-8" );

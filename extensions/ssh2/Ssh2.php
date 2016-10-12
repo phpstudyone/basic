@@ -12,22 +12,22 @@ use yii\base\Object;
  */
 class Ssh2 extends Object {
 	/**
-	 * @var string the host for establishing FTP connection. Defaults to null.
+	 * @var string ssh2主机地址，默认为空
 	 */
 	public $host = null;
 	
 	/**
-	 * @var string the port for establishing FTP connection. Defaults to 21.
+	 * @var string ssh2登录端口 默认22
 	 */
 	public $port = 22;
 	
 	/**
-	 * @var string the username for establishing FTP connection. Defaults to null.
+	 * @var string ssh2登录用户名
 	 */
 	public $username = null;
 	
 	/**
-	 * @var string the password for establishing FTP connection. Defaults to null.
+	 * @var string ssh2登录密码
 	 */
 	public $password = null;
 
@@ -38,38 +38,24 @@ class Ssh2 extends Object {
 
     /**
      * @var null 公钥文件
-     */
+	 */
     public $privkeyfile = null;
-
-
-	/**
-	 * @var boolean
-	 */
-	public $ssl = false;
 	
 	/**
-	 * @var string the timeout for establishing FTP connection. Defaults to 90.
-	 */
-	public $timeout = 90;
-	
-	/**
-	 * @var boolean whether the ftp connection should be automatically established
-	 *      the component is being initialized. Defaults to false. Note, this property is only
-	 *      effective when the EFtpComponent object is used as an application component.
+	 * @var bool 是否自动连接
 	 */
 	public $autoConnect = true;
 	private $_active = false;
-	private $_errors = null;
 	private $_connection = null;
+
+    /**
+     * @var string 远程文件开始地址
+     */
 	public $dir;
-	
-	/**
-	 * Initializes the component.
-	 * This method is required by {@link IApplicationComponent} and is invoked by application
-	 * when the EFtpComponent is used as an application component.
-	 * If you override this method, make sure to call the parent implementation
-	 * so that the component can be marked as initialized.
-	 */
+
+    /**
+     * 初始化方法
+     */
 	public function init() {
 		parent::init ();
 		if ($this->autoConnect)
@@ -78,18 +64,16 @@ class Ssh2 extends Object {
 	
 	/**
 	 * 获取当前连接 是否连接上
-	 * @return boolean whether the FTP connection is established
 	 */
 	public function getActive() {
 		return $this->_active;
 	}
-	
-	/**
-	 * 设置当前连接 打开或关闭 ftp
-	 * Open or close the FTP connection.
-	 * @param boolean whether to open or close FTP connection
-	 * @throws CException if connection fails
-	 */
+
+    /**
+     * 设置ssh2连接 打开或者关闭
+     * @param bool $value
+     *
+     */
 	public function setActive($value) {
 		if ($value != $this->_active) {
 			if ($value)
@@ -98,14 +82,14 @@ class Ssh2 extends Object {
 				$this->close ();
 		}
 	}
-	
-	/**
-	 * Connect to FTP if it is currently not
-	 * @throws CException if connection fails
-	 */
+
+    /**
+     * ssh2 连接
+     * @throws Exception
+     */
 	public function connect() {
 		if ($this->_connection === null) {
-			$this->_connection = ssh2_connect($this->host, $this->port, array('hostkey'=>'ssh-rsa'));
+			$this->_connection = ssh2_connect($this->host, $this->port, ['hostkey'=>'ssh-rsa']);
 			if (! $this->_connection)
 				throw new Exception ( '连接' . $this->host . '失败' );
             if (!ssh2_auth_pubkey_file($this->_connection, $this->username, $this->pubkeyfile, $this->privkeyfile, $this->password)) {
@@ -114,203 +98,106 @@ class Ssh2 extends Object {
 			$this->_active = true;
 		}
 	}
-	
-	/**
-	 * Closes the current FTP connection.
-	 *
-	 * @return boolean
-	 */
+
+    /**
+     * 关闭连接
+     * @return bool
+     */
 	public function close() {
 		if ($this->getActive ()) {
-			// Close the connection
-			if (ftp_close ( $this->_connection )) {
-				return true;
-			} else {
-				return false;
-			}
-			
-			$this->_active = false;
-			$this->_connection = null;
-			$this->_errors = null;
 		} else {
-			throw new Exception ( 'FtpComponent is inactive and cannot perform any FTP operations.' );
 		}
+		return true;
 	}
-	
-	/**
-	 * Passed an array of constants => values they will be set as FTP options.
-	 *
-	 * @param array $config        	
-	 * @return object (chainable)
-	 */
-	public function setOptions($config) {
+
+    /**
+     * 从远程服务器获取文件
+     * @param string $remote 远程文件
+     * @param string $local 本地存储文件
+     * @return bool
+     * @throws Exception
+     */
+	public function get($remote,$localRoot , $path ) {
 		if ($this->getActive ()) {
-			if (! is_array ( $config ))
-				throw new Exception ( 'EFtpComponent Error: The config parameter must be passed an array!' );
-				
-				// Loop through configuration array
-			foreach ( $config as $key => $value ) {
-				// Set the options and test to see if they did so successfully - throw an exception if it failed
-				if (! ftp_set_option ( $this->_connection, $key, $value ))
-					throw new Exception ( 'EFtpComponent Error: The system failed to set the FTP option: "' . $key . '" with the value: "' . $value . '"' );
-			}
-			
-			return $this;
+		    if(self::localCreateDir($localRoot , $path)){
+//                if(ssh2_scp_recv($this->_connection, $this->dir . $remote, $localRoot . $path)){
+//                    return true;
+//                } else {
+//                    throw new Exception ( '获取远程文件'.$remote.'失败' );
+//                }
+            }else
+                throw new Exception ( '目录不存在或创建目录失败' );
 		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
+			throw new Exception ( '连接远程服务器失败' );
 		}
 	}
-	
-	/**
-	 * 执行ftp命令
-	 * Execute a remote command on the FTP server.
-	 *
-	 * @see http://us2.php.net/manual/en/function.ftp-exec.php
-	 * @param
-	 *        	string remote command
-	 * @return boolean
-	 */
-	public function execute($command) {
+
+    /**
+     * 发送本地文件至服务器
+     * @param string $local
+     * @param string $remote
+     * @return bool
+     * @throws Exception
+     */
+	public function put($local, $remote) {
 		if ($this->getActive ()) {
-			// Execute command
-			if (ftp_exec ( $this->_connection, $command )) {
-				return true;
-			} else {
-				return false;
+            if(ssh2_scp_send ($this->_connection, $local, $remote)){
+                return true;
+            } else {
+                throw new Exception ( '发送本地文件'.$local.'失败' );
 			}
 		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
+			throw new Exception ( '连接远程服务器失败' );
 		}
 	}
-	
+
+    /**
+     * 本地创建目录
+     * 可以递归创建，默认是以当前网站根目录下创建
+     * 第二个参数指定，就以第二参数目录下创建
+     * @param string $path 要创建的目录
+     * @param string $webRoot 要创建目录的根目录
+     * @return boolean
+     */
+    public static function localCreateDir($localRoot , $path) {
+        $filePath = preg_replace ( '/\/+|\\+/', DS, $localRoot . $path );
+        $dir = pathinfo($filePath,1);
+        if (! is_dir ( $dir )) {
+            if (! mkdir ( $dir, 0777, true ))
+                return false;
+            else
+                chmod ( $localRoot, 0777 );
+        }
+        return true;
+    }
+
 	/**
-	 * 获取远程文件到本地
-	 * Get executes a get command on the remote FTP server.
-	 *
-	 * @param
-	 *        	string local file
-	 * @param
-	 *        	string remote file
-	 * @param
-	 *        	const mode
-	 * @return boolean
-	 */
-	public function get($local, $remote, $mode = FTP_ASCII) {
-		if ($this->getActive ()) {
-			// Get the requested file
-			if (ftp_get ( $this->_connection, $local, $remote, $mode )) {
-				// If successful, return the path to the downloaded file...
-				return $remote;
-			} else {
-				return false;
-			}
-		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
-		}
-	}
-	
-	/**
-	 * 发送本地文件到ftp服务器
-	 * Put executes a put command on the remote FTP server.
-	 * 
-	 * @param string $remote        	
-	 * @param string $local        	
-	 * @param int $mode        	
+	 * 创建目录
+	 * @param string $dir
 	 * @return bool
-	 * @throws CDbException
-	 */
-	public function put($remote, $local, $mode = FTP_BINARY) {
-		if ($this->getActive ()) {
-			// Upload the local file to the remote location specified
-			ftp_chdir ( $this->_connection, '/' );
-			if (ftp_put ( $this->_connection, $remote, $local, $mode )) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
-		}
-	}
-	
-	/**
-	 * 给远程文件重命名
-	 * Rename executes a rename command on the remote FTP server.
-	 *
-	 * @param
-	 *        	string old filename
-	 * @param
-	 *        	string new filename
-	 * @return boolean
-	 */
-	public function rename($old, $new) {
-		if ($this->getActive ()) {
-			// Rename the file
-			ftp_chdir ( $this->_connection, '/' );
-			if (ftp_rename ( $this->_connection, $old, $new )) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
-		}
-	}
-	
-	/**
-	 * Rmdir executes an rmdir (remove directory) command on the remote FTP server.
-	 *
-	 * @param
-	 *        	string remote directory
-	 * @return boolean
-	 */
-	public function rmdir($dir) {
-		if ($this->getActive ()) {
-			// Remove the directory
-			if (ftp_rmdir ( $this->_connection, $dir )) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
-		}
-	}
-	
-	/**
-	 * Mkdir executes an mkdir (create directory) command on the remote FTP server.
-	 * 
-	 * @param
-	 *        	$dir
-	 * @return bool
-	 * @throws CDbException
 	 */
 	public function mkdir($dir) {
 		if ($this->getActive ()) {
-			// create directory
 			if (ftp_mkdir ( $this->_connection, $dir )) {
 				return true;
 			} else {
 				return false;
 			}
 		} else {
-			throw new Exception ( 'EFtpComponent is inactive and cannot perform any FTP operations.' );
+			throw new Exception ( '连接失败' );
 		}
 	}
 	
 	/**
-	 * 创建目录\以及子目录
-	 * 
-	 * @param
-	 *        	$path
+	 * 远程创建目录\以及子目录
+	 * @param string $path
 	 * @return bool
 	 */
-	public function createDir($path) {
+	public function remoteCreateDir($path) {
 		$path = preg_replace ( '/\/+|\\+/', DS, $path );
 		$dir = explode ( DS, $path );
 		$path = "";
 		$ret = true;
-		
 		for($i = 0; $i < count ( $dir ); $i ++) {
 			$path .= "/" . $dir [$i];
 			if (! @ftp_chdir ( $this->_connection, $path )) {

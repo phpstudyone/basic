@@ -1,7 +1,7 @@
 <?php
 
 $params = require(__DIR__ . '/params.php');
-
+defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
@@ -67,7 +67,7 @@ $config = [
             'pubkeyfile' => "C:/wamp/www/basic/web/id_rsa.pub",
             'privkeyfile' => "C:/wamp/www/basic/web/App",
             'autoConnect' => true,
-            'dir' => '',
+            'dir' => '/var/www/html/web/',
         ],
         'db' => require(__DIR__ . '/db.php'),
         /*
