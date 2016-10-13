@@ -20,7 +20,11 @@ class SshUploadFile{
     public static function get(array $path , $localPath = "C:/wamp/www/shop/"){
         $ssh = Yii::$app->ssh2;
         foreach ($path as $value){
-            $ssh->get($value,$localPath , $value);
+            try{
+                $ssh->get($value,$localPath , $value);
+            }catch (Exception $e){
+//                echo $e->getMessage();
+            }
         }
     }
 }

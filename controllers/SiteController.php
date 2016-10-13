@@ -6,6 +6,7 @@ use app\components\Redis;
 use app\components\RSA;
 use app\components\SshUploadFile;
 use Yii;
+use yii\base\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -50,8 +51,24 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionText1(){
+        for($i = 1 ; $i<10;$i++){
+            try{
+                if($i == 5){
+                    throw new Exception('测试');
+                }
+                echo $i;
+            }catch (Exception $e){
+            }
+        }
+    }
+
+
     public function actionText(){
-        SshUploadFile::get(['Application/Shop/View/Public/error.html'],"c:/");die;
+        SshUploadFile::get([
+            "Application\Shop\View\Public\error.html",
+            'Application/Shop/View/Public/error.html',
+        ],"c:/");die;
     }
     public function actionIndex()
     {

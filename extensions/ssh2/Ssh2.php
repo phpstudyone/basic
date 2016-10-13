@@ -120,13 +120,18 @@ class Ssh2 extends Object {
 	public function get($remote,$localRoot , $path ) {
 		if ($this->getActive ()) {
 		    if(self::localCreateDir($localRoot , $path)){
-//                if(ssh2_scp_recv($this->_connection, $this->dir . $remote, $localRoot . $path)){
-//                    return true;
-//                } else {
-//                    throw new Exception ( '获取远程文件'.$remote.'失败' );
-//                }
-            }else
+		        try{
+                    if(ssh2_scp_recv($this->_connection, self::replacePath($this->dir . $remote), $localRoot . $path)){
+                        return true;
+                    } else {
+                        throw new Exception ( '获取远程文件'.$remote.'失败' );
+                    }
+                }catch (Exception $e){
+                    echo $e->getMessage();
+                }
+            }else{
                 throw new Exception ( '目录不存在或创建目录失败' );
+            }
 		} else {
 			throw new Exception ( '连接远程服务器失败' );
 		}
@@ -152,15 +157,13 @@ class Ssh2 extends Object {
 	}
 
     /**
-     * 本地创建目录
-     * 可以递归创建，默认是以当前网站根目录下创建
-     * 第二个参数指定，就以第二参数目录下创建
-     * @param string $path 要创建的目录
-     * @param string $webRoot 要创建目录的根目录
-     * @return boolean
+     * 本地递归创建目录
+     * @param  string $localRoot 本地根目录
+     * @param  string $path      相对目录
+     * @return boolean           是否创建成功
      */
     public static function localCreateDir($localRoot , $path) {
-        $filePath = preg_replace ( '/\/+|\\+/', DS, $localRoot . $path );
+        $filePath = self::replacePath($localRoot . $path);
         $dir = pathinfo($filePath,1);
         if (! is_dir ( $dir )) {
             if (! mkdir ( $dir, 0777, true ))
@@ -169,6 +172,15 @@ class Ssh2 extends Object {
                 chmod ( $localRoot, 0777 );
         }
         return true;
+    }
+
+    /**
+     * 格式化目录
+     * @param  string $path 文件路径
+     * @return string       替换后的文件路径
+     */
+    public static function replacePath($path){
+    	return preg_replace ( '/\/+|\\+/', DS, $path );
     }
 
 	/**
