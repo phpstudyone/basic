@@ -8,6 +8,8 @@
 namespace app\commands;
 
 use yii\console\Controller;
+use app\components\DataHander;
+use app\components\Redis;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -26,5 +28,26 @@ class HelloController extends Controller
     public function actionIndex($message = 'hello world')
     {
         echo $message . "\n";
+    }
+
+    public function actionDataTest(){
+        $allTables = DataHander::getAllTables();
+        if($allTables && $allTables != 'dataOver'){
+            $tableName = current($allTables[0]);
+            $str = "##新建" . $tableName . "\r\n";
+            DataHander::writeFile($str);
+            echo $str;
+            $createTableSql = DataHander::getCreateTableSql($tableName);
+            DataHander::writeFile($createTableSql . ';');
+            $insertSql = DataHander::getInsertTableSql($tableName);
+            DataHander::writeFile($insertSql);
+            echo "插入".$tableName."数据成功";
+            array_shift($allTables);
+            if($allTables)
+                Redis::setCache('allTables',$allTables);
+            else{
+                Redis::setCache('allTables','dataOver');
+            }
+        }
     }
 }

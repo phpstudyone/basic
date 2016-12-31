@@ -63,7 +63,7 @@ class DataHander{
                     $i = 0;
                     $valueCount = count($value);
                     foreach ($value as $k => $v) {
-                        $v = substr($v, 0, 30);
+                        $v = addslashes(substr($v, 0, 30));
                         $insertSql .= '"' . $v . '"';
                         $i++;
                         if ($i != $valueCount) $insertSql .= ",";

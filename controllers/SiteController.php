@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\components\Redis;
+
 use app\components\RSA;
 use app\components\SshUploadFile;
 use Yii;
