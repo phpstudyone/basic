@@ -7,14 +7,16 @@ namespace app\components;
 
 use yii;
 class DataHander{
-    
+
+    //存储sql语句的文件路径
+    const SQL_FILE_PATH = "c:/sql.sql";
+
     /**
      * 获取数据表所有的表
      * @return array|mixed
      */
     public static function getAllTables(){
         $allTables = Redis::getCache('allTables');
-        $isOver = Redis::getCache('isOver');
         if(!$allTables){
             $sql = "show tables";
             $allTables = Yii::$app->db->createCommand($sql)->queryAll();
@@ -34,5 +36,44 @@ class DataHander{
         if($createSql){
             return end($createSql);
         }else return false;
+    }
+
+    /**
+     * 将字符串以追加的形式写入文件
+     * @param $str
+     */
+    public static function writeFile($str){
+        file_put_contents(self::SQL_FILE_PATH,$str . "\r\n",FILE_APPEND);
+    }
+
+    /**
+     * 根据表名获取插入数据的sql
+     * @param $tableName
+     * @return string
+     */
+    public static function getInsertTableSql($tableName){
+        $insertSql = "insert into " . $tableName . " values ";
+        $sql = "select * from " . $tableName . " limit 500";
+        $data = Yii::$app->db->createCommand($sql)->queryAll();
+        if ($data) {
+            $count = count($data);
+            foreach ($data as $key => $value) {
+                $insertSql .= "(";
+                if (is_array($value)) {
+                    $i = 0;
+                    $valueCount = count($value);
+                    foreach ($value as $k => $v) {
+                        $v = substr($v, 0, 30);
+                        $insertSql .= '"' . $v . '"';
+                        $i++;
+                        if ($i != $valueCount) $insertSql .= ",";
+                    }
+                }
+                $insertSql .= ")";
+                if ($key == $count - 1) $insertSql .= ";\r\n";
+                else $insertSql .= ",";
+            }
+        }
+        return $insertSql;
     }
 }
