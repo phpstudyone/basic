@@ -9,7 +9,7 @@ use yii;
 class DataHander{
 
     //存储sql语句的文件路径
-    const SQL_FILE_PATH = "c:/sql.sql";
+    const SQL_FILE_PATH = "/var/www/html/basic/sql.sql";
 
     /**
      * 获取数据表所有的表

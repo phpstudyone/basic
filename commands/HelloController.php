@@ -36,12 +36,12 @@ class HelloController extends Controller
             $tableName = current($allTables[0]);
             $str = "##新建" . $tableName . "\r\n";
             DataHander::writeFile($str);
-            echo $str;
+            echo $str . date('Y-m-d H:i:s');
             $createTableSql = DataHander::getCreateTableSql($tableName);
             DataHander::writeFile($createTableSql . ';');
             $insertSql = DataHander::getInsertTableSql($tableName);
             DataHander::writeFile($insertSql);
-            echo "插入".$tableName."数据成功";
+            echo "插入".$tableName."数据成功 ".date('Y-m-d H:i:s') ."\r\n";
             array_shift($allTables);
             if($allTables)
                 Redis::setCache('allTables',$allTables);
