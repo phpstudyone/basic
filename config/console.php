@@ -14,6 +14,15 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'redis' => [
+            'class' => 'yii\redis\Cache',
+//            'class' => 'yii\redis\Connection',//此种配置不能在set里面设置过期时间，需要单独设置 不采用
+            'redis'=>[
+                'hostname' => '127.0.0.1',
+                'port' => 6379,
+                'database' => 0,
+            ]
+        ],
         'log' => [
             'targets' => [
                 [
