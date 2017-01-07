@@ -8,7 +8,7 @@
  */
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;dbname=爬虫',
+    'dsn' => 'mysql:host=127.0.0.1;dbname=pachong',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8',
