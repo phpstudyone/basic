@@ -114,10 +114,9 @@ class CollectUrl extends \yii\db\ActiveRecord
             $matches = [];
             preg_match_all($val['url'],$page,$matches);
             if (!empty($matches)){
-                foreach ($matches[0] as $value){
-                    if($val['complete'] == 0)
-                        $url = $value;
-                    else $url = self::HOST_URL . $value;
+                $data = $val['complete'] == 0 ? $matches[0] : $matches[1];
+                foreach ($data as $value){
+                    $url = $val['complete'] == 0 ? $value : self::HOST_URL . $value;
                     $model = self::findOne(['url'=>$url]);
                     if (!$model){
                         $model = new self();
@@ -126,7 +125,7 @@ class CollectUrl extends \yii\db\ActiveRecord
                         $model->create_time = time();
                         $model->save();
                     }
-                }die;
+                }
             }
         }
     }

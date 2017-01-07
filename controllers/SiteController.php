@@ -67,11 +67,12 @@ class SiteController extends Controller
             while (true){
                 //把要爬的url放入数据库
                 $preg = [
-                    //完整的url
-                    ['complete'=>1,'url'=>'(http://coding.imooc.com/.*/\d{1,9}.html)'],
-                    ['complete'=>0,'url'=>'/<a href="(\/view\/\d{3})" target="\_self">/'],
-                    ['complete'=>0,'url'=>'/<a href="(\/learn\/\d{3})" class="btn-red start-study-btn r">/'],
-                    ['complete'=>0,'url'=>'/<a href="(\/course\/list\?c=.*)" data.*/'],
+                    ['complete'=>1,'url'=>'/href="(\/course\/list\?\w{0,}=\w{0,})"/'],
+                    ['complete'=>1,'url'=>'/<a href="(\/course\/list\?.*=.*)" data.*/'],
+                    ['complete'=>0,'url'=>'(http://.*\.imooc\.com\/\w{1,}\/\d{1,}\.html)'],
+                    ['complete'=>1,'url'=>'/href="(\/learn\/\d{0,})"/'],
+                    ['complete'=>1,'url'=>'/<a href="(\/view\/\d{1,})" target="\_self">/'],
+
                 ];
                 CollectUrl::saveUrlRewrite($preg, $output);die;
 // 				<a target="_blank" href='/video/10005' class="J-media-item studyvideo">
