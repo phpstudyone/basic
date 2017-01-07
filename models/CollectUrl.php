@@ -15,6 +15,30 @@ use Yii;
  */
 class CollectUrl extends \yii\db\ActiveRecord
 {
+    const IS_COLLECt_YES = 1; //已采集
+    const IS_COLLECt_NOT = 0; //未采集
+
+    const HOST_URL = 'http://www.imooc.com';//主域名
+//    const LOGIN_URL = "http://www.imooc.com/passport/user/login";       //imooc登录url(新登录url，需要验证来源和验证码)
+    const LOGIN_URL = "http://www.imooc.com/user/login";                   //imooc登录url（老登录url，还能用）
+    const LIST_URL = "http://www.imooc.com/course/list";                //imooc列表页 采集的入口
+
+    const IMOOC_USERNAME = "845830229@qq.com";
+    const IMOOC_PASSWORD = "zrhyhhxxy";
+
+    /**
+     * 获取采集状态
+     * @param null $key
+     * @return array
+     */
+    public static function getIsCollect($key = null){
+        $data = [
+            self::IS_COLLECt_NOT => 0,
+            self::IS_COLLECt_YES => 1
+        ];
+        return $key === null ? $data : $data[$key];
+    }
+
     /**
      * @inheritdoc
      */

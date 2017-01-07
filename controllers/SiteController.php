@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\components\RSA;
 use app\components\SshUploadFile;
+use app\models\CollectUrl;
 use Yii;
 use yii\base\Exception;
 use yii\filters\AccessControl;
@@ -49,6 +50,64 @@ class SiteController extends Controller
                 'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
         ];
+    }
+
+    /**
+     * 爬虫测试
+     */
+    public function actionPachong(){
+        set_time_limit(0);
+        $data=[
+            'username' => CollectUrl::IMOOC_USERNAME,
+            'password' => CollectUrl::IMOOC_PASSWORD,
+            'remember'=>1,
+            'referer'=>CollectUrl::HOST_URL];
+        try {
+            $curlobj = curl_init();			// 初始化
+            curl_setopt($curlobj, CURLOPT_URL, CollectUrl::LOGIN_URL);		// 设置访问网页的URL
+            curl_setopt($curlobj, CURLOPT_RETURNTRANSFER, true);			// 执行之后不直接打印出来
+
+            // Cookie相关设置，这部分设置需要在所有会话开始之前设置
+            date_default_timezone_set('PRC'); // 使用Cookie时，必须先设置时区
+            curl_setopt($curlobj, CURLOPT_COOKIESESSION, TRUE);
+            curl_setopt($curlobj, CURLOPT_COOKIEFILE, 'cookiefile');
+            curl_setopt($curlobj, CURLOPT_COOKIEJAR, 'cookiefile');
+            curl_setopt($curlobj, CURLOPT_COOKIE, session_name() . '=' . session_id());
+            curl_setopt($curlobj, CURLOPT_HEADER, 0);
+            curl_setopt($curlobj, CURLOPT_FOLLOWLOCATION, 1); // 这样能够让cURL支持页面链接跳转
+
+            curl_setopt($curlobj, CURLOPT_POST, 1);
+            curl_setopt($curlobj, CURLOPT_POSTFIELDS, $data);
+//             		curl_setopt($curlobj, CURLOPT_HTTPHEADER, array("application/x-www-form-urlencoded; charset=utf-8",
+//             				"Content-length: ".strlen($data)
+//             		));
+            var_dump(curl_exec($curlobj),session_name() . '=' . session_id());die;	// 执行
+
+            curl_setopt($curlobj, CURLOPT_URL, "http://www.imooc.com/course/list");
+// 			curl_setopt($curlobj, CURLOPT_URL, "http://www.imooc.com/learn/520");
+            curl_setopt($curlobj, CURLOPT_POST, 0);
+            curl_setopt($curlobj, CURLOPT_HTTPHEADER, array("Content-type: text/html"));
+            $output=curl_exec($curlobj);	// 执行
+            var_dump($output);die;
+            while (true){
+                //把要爬的url放入数据库
+                $preg = array(
+                    '/<a href="(\/course\/list\?c=.*)" data.*/',
+                    '/<a href="(\/view\/\d{3})" target="\_self">/',
+                    '/<a href="(\/learn\/\d{3})" class="btn-red start-study-btn r">/'
+                );
+                Tool::saveUrlRewrite($preg, $output);
+// 				<a target="_blank" href='/video/10005' class="J-media-item studyvideo">
+                //把要获取的url放入数据库
+                $preg = array('/<a target="_blank" href=\'(\/video\/\d{4,6})\' class="J-media-item studyvideo">/');
+                Tool::saveGetUrlRewrite($preg, $output);
+                $output = Tool::curlWhile($curlobj);
+            }
+            curl_close($curlobj);			// 关闭cURL
+            echo $output;
+        }catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     public function actionText1(){
