@@ -356,6 +356,36 @@ class ToolHandler {
 		}
 		return $result;
 	}
+
+	/**
+	 * 返回url的后缀名
+	 * @param $url
+	 * @return mixed
+	 */
+	public static function getExt($url){
+		$arr = parse_url($url);
+		$file = basename($arr['path']);
+		$ext = explode('.',$file);
+		return $ext[count($ext)-1];
+	}
+
+	/**
+	 * 下载文件
+	 * @param $file_url
+	 * @param $save_to
+	 */
+	public static function download_remote_file_with_curl($file_url, $save_to)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_POST, 0);
+		curl_setopt($ch,CURLOPT_URL,$file_url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$file_content = curl_exec($ch);
+		curl_close($ch);
+		$downloaded_file = fopen($save_to, 'w');
+		fwrite($downloaded_file, $file_content);
+		fclose($downloaded_file);
+	}
 	
 	/**
 	 * 创建目录
@@ -368,12 +398,9 @@ class ToolHandler {
 	 *        	要创建目录的根目录
 	 * @return boolean
 	 */
-	public static function createDir($path, $webRoot = null) {
+	public static function createDir($path, $webRoot) {
 		$path = preg_replace ( '/\/+|\\+/', DS, $path );
-		
-		if (! is_dir ( $webRoot )) {
-			$webRoot = \Yii::getAlias ( '@webroot' );
-		}
+
 		$dir = $webRoot . DS . $path;
 		if (! is_dir ( $dir )) {
 			if (! mkdir ( $dir, 0777, true ))

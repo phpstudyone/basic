@@ -1,102 +1,153 @@
-Yii 2 Basic Project Template
-============================
+说明
+====
+**本爬虫程序爬取imooc，获取imooc网站的视频链接，定时任务下载视频**
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-rapidly creating small projects.
-
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
-
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-basic/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-basic/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-basic.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-basic)
-
-DIRECTORY STRUCTURE
--------------------
-
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
-
-
-
-REQUIREMENTS
-------------
-
-The minimum requirement by this project template that your Web server supports PHP 5.4.0.
-
-
-INSTALLATION
-------------
-
-### Install from an Archive File
-
-Extract the archive file downloaded from [yiiframework.com](http://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
-
-Set cookie validation key in `config/web.php` file to some random secret string:
-
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
+爬虫需要建立的数据表
+1.采集数据表  **collect_data**
+  该表用于存储采集的数据
+``` sql
+CREATE TABLE `collect_data` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(128) NOT NULL,
+  `video_url` varchar(625) NOT NULL,
+  `is_download` tinyint(2) unsigned NOT NULL,
+  `video_path` varchar(625) NOT NULL,
+  `create_time` int(10) unsigned NOT NULL,
+  `download_begin_time` int(10) unsigned NOT NULL,
+  `download_end_time` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='采集数据表';
 ```
 
-You can then access the application through the following URL:
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-### Install via Composer
-
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix).
-
-You can then install this project template using the following command:
-
-~~~
-php composer.phar global require "fxp/composer-asset-plugin:~1.1.1"
-php composer.phar create-project --prefer-dist --stability=dev yiisoft/yii2-app-basic basic
-~~~
-
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-CONFIGURATION
--------------
-
-### Database
-
-Edit the file `config/db.php` with real data, for example:
-
-```php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
-];
+2.采集的url表 **collect_url**
+  该表存储采集的url
+``` sql
+CREATE TABLE `collect_url` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `url` varchar(625) NOT NULL COMMENT '采集的url',
+  `is_collect` tinyint(2) unsigned NOT NULL COMMENT '是否已经采集',
+  `create_time` int(10) unsigned NOT NULL COMMENT '生成时间',
+  `collect_time` int(10) unsigned NOT NULL COMMENT '采集时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='采集的url';
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+爬虫采集数据，命令行下执行
+**window系统**
+``` sh
+ C:/wamp/www/basic> yii hello/pachong
+```
+**linux系统**
+``` sh
+root@root:/var/www/html/basic$ ./yii hello/pachon
+```
+
+**获取视频的下载地址**
+在imooc网站加载的js中，有一个 [video.js](http://www.imooc.com/static/page/course/video.js?v=2016010602358:formatted) 文件。该文件中有代码:
+``` javascript
+    function c(a) {
+        $.getJSON("/course/ajaxmediainfo/?mid=" + pageInfo.mid + "&mode=flash", function(c) {
+            P = c.data.result,
+            a && a()
+        })
+    }
+```
+
+imooc的视频下载地址，可以请求[获取视频地址](http://www.imooc.com/course/ajaxmediainfo/?mid=372&mode=falsh)来获取，得到的json数据如下：
+``` json
+{
+    "result": 0, 
+    "data": {
+        "result": {
+            "mid": 372, 
+            "mpath": [
+                "http://v2.mukewang.com/736e6338-39b7-468c-9c92-e3ca06187de3/L.mp4?auth_key=1483869714-0-0-4002056eeca4a50189b5787117cd86bc", 
+                "http://v2.mukewang.com/736e6338-39b7-468c-9c92-e3ca06187de3/M.mp4?auth_key=1483869714-0-0-daed2cdfa62e662b391b4c2730bcba79", 
+                "http://v2.mukewang.com/736e6338-39b7-468c-9c92-e3ca06187de3/H.mp4?auth_key=1483869714-0-0-afd07ee1f892cc5109c45a3b628779ab"
+            ], 
+            "cpid": "147", 
+            "name": "商品的全选功能", 
+            "time": "239", 
+            //以下字段在以前老视频为空
+            "practise": [
+                {
+                    "id": 1, 
+                    "type": "1", 
+                    "timepoint": 445, 
+                    "status": "1", 
+                    "eid": "78", 
+                    "skip": 0, 
+                    "content": {
+                        "name": "1. 假设有一个勾选框元素el,如何在js中将其修改为选中状态？", 
+                        "options": [
+                            {
+                                "id": "303", 
+                                "name": "el.onclick(); ", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }, 
+                            {
+                                "id": "304", 
+                                "name": "el.onchange();", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }, 
+                            {
+                                "id": "305", 
+                                "name": "el.checked = ture;", 
+                                "tip": "", 
+                                "is_answer": "1"
+                            }, 
+                            {
+                                "id": "306", 
+                                "name": "el.checked();", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }
+                        ]
+                    }
+                }, 
+                {
+                    "id": 2, 
+                    "type": "1", 
+                    "timepoint": 446, 
+                    "status": "1", 
+                    "eid": "80", 
+                    "skip": 0, 
+                    "content": {
+                        "name": "2. 取得tr元素下面所有td标签，下面选项错误的是？", 
+                        "options": [
+                            {
+                                "id": "311", 
+                                "name": "tr.cells", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }, 
+                            {
+                                "id": "312", 
+                                "name": "tr.children  ", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }, 
+                            {
+                                "id": "313", 
+                                "name": "tr.getElementsByTagName(‘td’);", 
+                                "tip": "", 
+                                "is_answer": "0"
+                            }, 
+                            {
+                                "id": "314", 
+                                "name": "tr.rows", 
+                                "tip": "", 
+                                "is_answer": "1"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }, 
+    "msg": "成功"
+}
+```
+我们只需要解析出mpath数据就行，每条视屏有三条url，分别为 “普清”，“高清”，“超清”链接
