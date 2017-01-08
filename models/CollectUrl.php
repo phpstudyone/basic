@@ -60,8 +60,8 @@ class CollectUrl extends \yii\db\ActiveRecord
      */
     public static function getIsCollect($key = null){
         $data = [
-            self::IS_COLLECt_NOT => 0,
-            self::IS_COLLECt_YES => 1
+            self::IS_COLLECt_NOT => '未采集',
+            self::IS_COLLECt_YES => '已采集'
         ];
         return $key === null ? $data : $data[$key];
     }
@@ -105,11 +105,11 @@ class CollectUrl extends \yii\db\ActiveRecord
     }
 
     /**
-     * 把需要爬的url保存在CURL表中
+     * 把需要爬的url保存在collect_url表中
      * @param Array $preg 获取页面的链接的正则表达式  数组
      * @param string $page 页面内容
      */
-    public static function saveUrlRewrite($preg,$page){
+    public static function saveUrl($preg,$page){
         foreach ($preg as $val){
             $matches = [];
             preg_match_all($val['url'],$page,$matches);
