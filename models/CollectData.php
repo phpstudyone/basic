@@ -61,6 +61,7 @@ class CollectData extends \yii\db\ActiveRecord
                         $model->create_time = time();
                         $model->save();
                     }
+                    unset($model);
                 }
             }
         }

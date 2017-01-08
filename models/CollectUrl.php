@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\base\Exception;
+use yii\db\Query;
 
 /**
  * This is the model class for table "collect_url".
@@ -110,24 +112,55 @@ class CollectUrl extends \yii\db\ActiveRecord
      * @param string $page 页面内容
      */
     public static function saveUrl($preg,$page){
-        foreach ($preg as $val){
-            $matches = [];
-            preg_match_all($val['url'],$page,$matches);
-            if (!empty($matches)){
-                $data = $val['complete'] == 0 ? $matches[0] : $matches[1];
-                foreach ($data as $value){
-                    $url = $val['complete'] == 0 ? $value : self::HOST_URL . $value;
-                    $model = self::findOne(['url'=>$url]);
-                    if (!$model){
-                        $model = new self();
-                        $model->url = $url;
-                        $model->is_collect = self::IS_COLLECt_NOT;
-                        $model->create_time = time();
-                        $model->save();
+        try{
+            foreach ($preg as $val){
+                $matches = [];
+                if(isset($val['url']) && !empty($val['url'])){
+                    preg_match_all($val['url'],$page,$matches);
+                    if (!empty($matches)){
+                        $data = $val['complete'] == 0 ? $matches[0] : $matches[1];
+                        foreach ($data as $value){
+                            $url = $val['complete'] == 0 ? $value : self::HOST_URL . $value;
+                            $model = self::findOne(['url'=>$url]);
+                            if (!$model){
+                                $model = new self();
+                                $model->url = $url;
+                                $model->is_collect = self::IS_COLLECt_NOT;
+                                $model->create_time = time();
+                                $model->save();
+                            }
+                            unset($model);
+                        }
                     }
-                }
+                }else throw new Exception(var_export($val));
             }
+        }catch (Exception $e){
+            echo $e->getMessage();die;
         }
+
+    }
+
+    /**
+     * 从数据库中获取一条没有被访问的url进行访问
+     */
+    public static function curlWhile($curlobj){
+        $url = (new Query())->select(['id','url'])
+            ->from(self::tableName())
+            ->where('is_collect=:is_collect',[':is_collect' => self::IS_COLLECt_NOT])
+            ->orderBy(['id' => SORT_ASC])
+            ->limit(1)
+            ->one();
+        if($url){
+            curl_setopt($curlobj, CURLOPT_URL, $url['url']);
+            curl_setopt($curlobj, CURLOPT_POST, 0);
+            curl_setopt($curlobj, CURLOPT_HTTPHEADER, array("Content-type: text/html"));
+            $output=curl_exec($curlobj);	// 执行
+            $model = self::findOne(['id'=>$url['id']]);
+            $model->is_collect = self::IS_COLLECt_YES;
+            $model->collect_time = time();
+            $model->save();
+            return $output;
+        }else return false;
     }
 
     /**
