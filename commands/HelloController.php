@@ -7,6 +7,7 @@
 
 namespace app\commands;
 
+use app\components\ToolHandler;
 use yii\console\Controller;
 use app\components\DataHander;
 use app\components\Redis;
@@ -15,6 +16,7 @@ use app\models\CollectData;
 use app\models\CollectUrl;
 use Yii;
 use yii\base\Exception;
+use yii\db\Query;
 
 /**
  * This command echoes the first argument that you have entered.
@@ -82,6 +84,58 @@ class HelloController extends Controller
             echo $e->getMessage();
         }
     }
+
+    /**
+     * 下载视频
+     */
+    public function actionDownload(){
+        set_time_limit(0);
+        ini_set('memory_limit','1000M');
+        $flag = true;
+        while($flag){
+            $url = (new Query())
+                ->select(['video_url','id'])
+                ->from(CollectData::tableName())
+                ->where('is_download=:is_download',[':is_download'=>CollectData::IS_DOWNLOAD_NOT])
+                ->orderBy(['id'=>SORT_ASC])
+                ->limit(1)
+                ->one();
+            if($url){
+                $preg = '/http:\/\/www.imooc.com\/video\/(\d{1,})/';
+                $matches = [];
+                preg_match($preg,$url['video_url'],$matches);
+                $model = CollectData::findOne(['id'=>$url['id']]);
+                $model->download_begin_time = time();
+                if(isset($matches[1]) && !empty($matches[1])){
+                    $mid = $matches[1];
+                    $getVideoUrl = CollectData::GET_IMOOC_DOWNLOAD . "?mid=". $mid . '$mode=falsh';
+                    $result = json_decode(CollectData::getContentByCurl($getVideoUrl),true);
+                    //高清视频地址
+                    $Hmp4 = isset($result['data']['result']['mpath'][0]) ? $result['data']['result']['mpath'][0] : '';
+                    $videoName = isset($result['data']['result']['name']) ? $result['data']['result']['name'] : '';
+                    if(!empty($Hmp4)){
+                        $model->title = $videoName;
+                        $root = "c:/video";
+                        $path = date('Y/m/d') . "/" ;
+                        ToolHandler::createDir($path,$root);
+                        $suffx = ToolHandler::getExt($Hmp4);
+                        $path = $root . '/' . $path . mt_rand(1,999) . time() . ".". $suffx;
+                        $model->video_path = $path;
+                        $model->download_begin_time = time();
+                        ToolHandler::download_remote_file_with_curl($Hmp4,$path);
+                        $model->download_end_time = time();
+                    }
+                }
+                $model->is_download = CollectData::IS_DOWNLOAD_YES;
+                $model->save();
+                unset($model);
+            }else{
+                $flag = false;
+            }
+        }
+    }
+
+
 
     /**
      * 数据库导出

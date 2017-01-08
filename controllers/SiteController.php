@@ -9,6 +9,7 @@ use app\models\CollectData;
 use app\models\CollectUrl;
 use Yii;
 use yii\base\Exception;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
