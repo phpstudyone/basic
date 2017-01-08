@@ -1,5 +1,12 @@
 说明
 ====
+## 第一个分支 development ##  **使用ssh2来pull or pull 文件**
+    因为很多公司，线上或者测试环境的代码，不是直接svn下来的，而是靠程序猿使用ftp软件手工的更新代码，而且服务器是使用私钥登录，如果代码文件多，还在不同的路径，这个工作是非常繁杂的。所以写了这个小工具，只要把要更新的代码的路径复制提交就可以自动更新其他环境代码。（毕竟我大svn可以直接导出更新的代码path）
+
+## 第二个分支datahand ## **复制数据库结构和数据的插入sql**
+    有时想本地弄个数据库方便测试，但是用工具直接导的话，数据库如果比较大，则会非常耗时，目前还没找到一款工具支持每个表导出500条数据-----这个分支只会复制数据库结构和500插入sql。
+
+## 第三个分支 pachong ##  **自动下载慕课网上的视频**
 **本爬虫程序爬取imooc，获取imooc网站的视频链接，定时任务下载视频**
 
 爬虫需要建立的数据表
@@ -41,6 +48,18 @@ CREATE TABLE `collect_url` (
 ``` sh
 root@root:/var/www/html/basic$ ./yii hello/pachon
 ```
+
+自动下载视频，命令行下执行
+**window系统**
+``` sh
+ C:/wamp/www/basic> yii hello/download
+```
+**linux系统**
+``` sh
+root@root:/var/www/html/basic$ ./yii hello/download
+```
+
+
 
 **获取视频的下载地址**
 在imooc网站加载的js中，有一个 [video.js](http://www.imooc.com/static/page/course/video.js?v=2016010602358:formatted) 文件。该文件中有代码:
