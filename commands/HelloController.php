@@ -11,6 +11,11 @@ use yii\console\Controller;
 use app\components\DataHander;
 use app\components\Redis;
 
+use app\models\CollectData;
+use app\models\CollectUrl;
+use Yii;
+use yii\base\Exception;
+
 /**
  * This command echoes the first argument that you have entered.
  *
@@ -30,6 +35,57 @@ class HelloController extends Controller
         echo $message . "\n";
     }
 
+    /**
+     * 爬虫
+     */
+    public function actionPachong(){
+        set_time_limit(0);
+        ini_set('memory_limit','1000M');
+        try {
+            $curlobj = curl_init();			// 初始化
+            CollectUrl::loginImooc($curlobj,'new');
+            curl_setopt($curlobj, CURLOPT_URL, "http://www.imooc.com/course/list");
+//            curl_setopt($curlobj, CURLOPT_URL, "http://www.imooc.com/learn/752");
+            curl_setopt($curlobj, CURLOPT_POST, 0);
+            curl_setopt($curlobj, CURLOPT_HTTPHEADER, array("Content-type: text/html"));
+            $output=curl_exec($curlobj);	// 执行
+
+            /**
+             * 要爬取的url
+             */
+            $pregCollect = [
+                ['complete'=>1,'url'=>'/href="(\/course\/list\?\w{0,}=\w{0,})"/'],
+                ['complete'=>1,'url'=>'/<a href="(\/course\/list\?.*=.*)" data.*/'],
+                ['complete'=>1,'url'=>'/href="(\/learn\/\d{1,})"/'],
+                ['complete'=>0,'url'=>'/(http:\/\/.*\.imooc\.com\/\w{1,}\/\d{1,}\.html)/'],
+                ['complete'=>1,'url'=>'/href="(\/view\/\d{1,})"/'],
+            ];
+
+            /**
+             * 要采集的视频url
+             * href=["|\'](\/video\/\d{1,})["|\']
+             */
+            $preg = ["/href=[" . '"' . "|'](\/video\/\d{1,})[" . '"' . "|']/"];
+
+            while (true){
+                if($output){
+                    //把要爬的url放入数据库
+                    CollectUrl::saveUrl($pregCollect, $output);
+                    //把采集的视频url存入数据库
+                    CollectData::saveData($preg, $output);
+                    $output = CollectUrl::curlWhile($curlobj);
+                }else continue;
+            }
+            curl_close($curlobj);			// 关闭cURL
+            echo $output;
+        }catch (Exception $e){
+            echo $e->getMessage();
+        }
+    }
+
+    /**
+     * 数据库导出
+     */
     public function actionDataTest(){
         $allTables = DataHander::getAllTables();
         if($allTables && $allTables != 'dataOver'){

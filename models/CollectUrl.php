@@ -137,7 +137,6 @@ class CollectUrl extends \yii\db\ActiveRecord
         }catch (Exception $e){
             echo $e->getMessage();die;
         }
-
     }
 
     /**

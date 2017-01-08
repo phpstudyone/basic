@@ -31,3 +31,12 @@ CREATE TABLE `collect_url` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='采集的url';
 ```
 
+爬虫采集数据，命令行下执行
+**window系统**
+``` sh
+ C:/wamp/www/basic> yii hello/pachong
+```
+**linux系统**
+``` sh
+root@root:/var/www/html/basic$ ./yii hello/pachon
+```
