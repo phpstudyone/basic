@@ -26,6 +26,7 @@ class CollectData extends \yii\db\ActiveRecord
         return 'collect_data';
     }
 
+    //获取视频下载地址的url
     const GET_IMOOC_DOWNLOAD = "www.imooc.com/course/ajaxmediainfo/";
 
     const IS_DOWNLOAD_NOT = 0;

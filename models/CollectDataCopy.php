@@ -19,7 +19,10 @@ use Yii;
  */
 class CollectDataCopy extends \yii\db\ActiveRecord
 {
-
+    const MAXIMUM = 100000;         //最大的视频id
+    //获取视频前缀
+    const VIDEO_URL_PREFIX = "http://www.imooc.com/video/";
+    //获取视频下载地址的url
     const GET_IMOOC_DOWNLOAD = "www.imooc.com/course/ajaxmediainfo/";
 
     const IS_DOWNLOAD_NOT = 0;
@@ -54,6 +57,20 @@ class CollectDataCopy extends \yii\db\ActiveRecord
         return $key === null ? $data : $data[$key];
     }
 
+    /**
+     * 使用CURL方式获取网页内容
+     * @param string $url 要获取的内容的url
+     * @return string mixed 获取的内容
+     */
+    public static function getContentByCurl($url){
+        $ch = curl_init($url);
+        curl_setopt($ch,CURLOPT_HEADER,0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);			// 执行之后不直接打印出来
+        $content = curl_exec($ch);
+        curl_close($ch);
+        return $content;
+    }
+
 
     /**
      * @inheritdoc
@@ -69,7 +86,7 @@ class CollectDataCopy extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'video_url', 'is_download', 'is_exist', 'video_path', 'create_time', 'download_begin_time', 'download_end_time'], 'required'],
+            [['title', 'video_url', 'is_download', 'is_exist', 'create_time'], 'required'],
             [['is_download', 'is_exist', 'create_time', 'download_begin_time', 'download_end_time'], 'integer'],
             [['title'], 'string', 'max' => 128],
             [['video_url', 'video_path'], 'string', 'max' => 625],

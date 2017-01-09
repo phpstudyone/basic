@@ -8,6 +8,7 @@
 namespace app\commands;
 
 use app\components\ToolHandler;
+use app\models\CollectDataCopy;
 use yii\console\Controller;
 use app\components\DataHander;
 use app\components\Redis;
@@ -35,6 +36,31 @@ class HelloController extends Controller
     public function actionIndex($message = 'hello world')
     {
         echo $message . "\n";
+    }
+
+    /**
+     * 遍历视频，获取所有能下载的视频
+     */
+    public function actionErgodic(){
+        set_time_limit(0);
+        ini_set('memory_limit','1000M');
+        for($i = 1 ; $i <= CollectDataCopy::MAXIMUM ; $i++){
+            $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $i . '$mode=falsh';
+            $result = json_decode(CollectDataCopy::getContentByCurl($getVideoUrl),true);
+            if(isset($result['data']['result']['name']) && !empty($result['data']['result']['name'])){
+                $model = new CollectDataCopy();
+                $model->title = $result['data']['result']['name'];
+                $model->is_exist = 1;
+                $model->video_url = CollectDataCopy::VIDEO_URL_PREFIX . $i;
+                $model->create_time = time();
+                $model->is_download = CollectDataCopy::IS_DOWNLOAD_NOT;
+                $model->is_exist = CollectDataCopy::IS_EXIST_NOT;
+                if(isset($result['data']['result']['mpath'][0]) && !empty($result['data']['result']['mpath'][0])){
+                    $model->is_exist = CollectDataCopy::IS_EXIST_YES;
+                }
+                $model->save();var_dump($model);die;
+            }
+        }
     }
 
     /**
