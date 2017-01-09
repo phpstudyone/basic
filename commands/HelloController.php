@@ -44,21 +44,27 @@ class HelloController extends Controller
     public function actionErgodic(){
         set_time_limit(0);
         ini_set('memory_limit','1000M');
-        for($i = 1 ; $i <= CollectDataCopy::MAXIMUM ; $i++){
-            $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $i . '$mode=falsh';
-            $result = json_decode(CollectDataCopy::getContentByCurl($getVideoUrl),true);
-            if(isset($result['data']['result']['name']) && !empty($result['data']['result']['name'])){
-                $model = new CollectDataCopy();
-                $model->title = $result['data']['result']['name'];
-                $model->is_exist = 1;
-                $model->video_url = CollectDataCopy::VIDEO_URL_PREFIX . $i;
-                $model->create_time = time();
-                $model->is_download = CollectDataCopy::IS_DOWNLOAD_NOT;
-                $model->is_exist = CollectDataCopy::IS_EXIST_NOT;
-                if(isset($result['data']['result']['mpath'][0]) && !empty($result['data']['result']['mpath'][0])){
-                    $model->is_exist = CollectDataCopy::IS_EXIST_YES;
+        for($id = 1 ; $id <= CollectDataCopy::MAXIMUM ; $id++){
+            //操作前先判断是否已存在数据表(下次可以直接执行，加大循环数)
+            $model = CollectDataCopy::findOne(['video_id'=>$id]);
+            if(!$model){
+                $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $id . '$mode=falsh';
+                $result = json_decode(CollectDataCopy::getContentByCurl($getVideoUrl),true);
+                if(isset($result['data']['result']['name']) && !empty($result['data']['result']['name'])){
+                    $model = new CollectDataCopy();
+                    $model->video_id = $id;
+                    $model->title = $result['data']['result']['name'];
+                    $model->is_exist = 1;
+                    $model->video_url = CollectDataCopy::VIDEO_URL_PREFIX . $id;
+                    $model->create_time = time();
+                    $model->is_download = CollectDataCopy::IS_DOWNLOAD_NOT;
+                    $model->is_exist = CollectDataCopy::IS_EXIST_NOT;
+                    if(isset($result['data']['result']['mpath'][0]) && !empty($result['data']['result']['mpath'][0])){
+                        $model->is_exist = CollectDataCopy::IS_EXIST_YES;
+                    }
+                    $model->save();
+                    unset($model);
                 }
-                $model->save();var_dump($model);die;
             }
         }
     }

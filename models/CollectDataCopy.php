@@ -8,6 +8,7 @@ use Yii;
  * This is the model class for table "collect_data_copy".
  *
  * @property string $id
+ * @property string $video_id
  * @property string $title
  * @property string $video_url
  * @property integer $is_download
@@ -86,8 +87,8 @@ class CollectDataCopy extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'video_url', 'is_download', 'is_exist', 'create_time'], 'required'],
-            [['is_download', 'is_exist', 'create_time', 'download_begin_time', 'download_end_time'], 'integer'],
+            [['title', 'video_id', 'video_url', 'is_download', 'is_exist', 'create_time'], 'required'],
+            [['is_download','video_id', 'is_exist', 'create_time', 'download_begin_time', 'download_end_time'], 'integer'],
             [['title'], 'string', 'max' => 128],
             [['video_url', 'video_path'], 'string', 'max' => 625],
         ];
