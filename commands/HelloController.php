@@ -39,6 +39,37 @@ class HelloController extends Controller
     }
 
     /**
+     * 补充数据
+     */
+    public function actionRepairData(){
+        set_time_limit(0);
+        ini_set('memory_limit','1000M');
+        $flag = true;
+        while($flag){
+            $data = (new Query())->select(['id','video_url'])
+                ->from(CollectDataCopy::tableName())
+                ->where(['json_string'=>''])
+                ->orderBy(['id'=>SORT_ASC])
+                ->limit(1)
+                ->one();
+            if($data){
+                //获取课程信息
+                $model = CollectDataCopy::findOne(['id'=>$data['id']]);
+                $learnInfo = CollectDataCopy::getLearInfoByVideo($model->video_url);
+                $model->learn_id = $learnInfo['learn_id'];
+                $model->learn_name = $learnInfo['learn_name'];
+                $model->learn_url = $learnInfo['learn_url'];
+                //获取下载地址的json信息
+                $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $model->id . '$mode=falsh';
+                $jsonData = CollectDataCopy::getContentByCurl($getVideoUrl);
+                $model->json_string = $jsonData;
+                $model->json_data = var_export(json_decode(CollectDataCopy::getContentByCurl($getVideoUrl),true),true);
+                $model->save();
+            }else $flag = false;
+        }
+    }
+
+    /**
      * 遍历视频，获取所有能下载的视频
      */
     public function actionErgodic(){
