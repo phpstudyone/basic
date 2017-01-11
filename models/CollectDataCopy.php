@@ -121,7 +121,7 @@ class CollectDataCopy extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'video_id', 'video_url', 'is_download', 'is_exist', 'create_time'], 'required'],
+            [['title', 'video_id', 'video_url', 'is_exist', 'create_time'], 'required'],
             [['is_download','video_id', 'is_exist', 'create_time', 'download_begin_time', 'download_end_time','learn_id'], 'integer'],
             [['title','learn_name'], 'string', 'max' => 128],
             [[ 'json_string','json_data'],'string' ],
