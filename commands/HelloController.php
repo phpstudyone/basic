@@ -39,6 +39,64 @@ class HelloController extends Controller
     }
 
     /**
+     * 全能方法，一个方法搞定所有数据，能完善能补充能新建
+     */
+    public function actionAlmighty(){
+        set_time_limit(0);
+        ini_set('memory_limit','1000M');
+        $count = 7;             //数据表已有数据的最大id（也可以自定义，看想下载到多少）
+        for($id = 1 ; $id <= $count ; $id++){
+            $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $id . '$mode=falsh';
+            $jsonData = CollectDataCopy::getContentByCurl($getVideoUrl);
+            $result = json_decode($jsonData,true);
+            if(isset($result['data']['result']['name']) && !empty($result['data']['result']['name'])){
+                $model = CollectDataCopy::findOne(['video_id'=>$id]);
+                if(!$model){
+                    //不存在，判断是否存在
+                    $model = new CollectDataCopy();
+                    $model->video_id = $id;
+                    $model->title = $result['data']['result']['name'];
+                    $model->video_url = CollectDataCopy::VIDEO_URL_PREFIX . $id;
+                    $model->create_time = time();
+                }
+
+                //完善课程信息
+                if(!$model->learn_id){
+                    $learnInfo = CollectDataCopy::getLearInfoByVideo($model->video_url);
+                    $model->learn_id = $learnInfo['learn_id'];
+                    $model->learn_name = $learnInfo['learn_name'];
+                    $model->learn_url = $learnInfo['learn_url'];
+                }
+
+                //下载视频
+                if(isset($result['data']['result']['mpath'][2]) && !empty($result['data']['result']['mpath'][2])) {
+                    $model->is_exist = CollectDataCopy::IS_EXIST_YES;
+                    if($model->is_download == CollectDataCopy::IS_DOWNLOAD_NOT){
+                        $model->download_begin_time = time();
+                        $Hmp4 = $result['data']['result']['mpath'][2];
+                        $root = "c:/video";
+                        $path = date('Y/m/d') . "/" ;
+                        ToolHandler::createDir($path,$root);
+                        $suffx = ToolHandler::getExt($Hmp4);
+                        $path = $root . '/' . $path  . time() . mt_rand(100,999) . ".". $suffx;
+                        $model->video_path = $path;
+                        $model->download_begin_time = time();
+                        ToolHandler::download_remote_file_with_curl($Hmp4,$path);
+                        $model->download_end_time = time();
+                        $model->is_download = CollectDataCopy::IS_DOWNLOAD_YES;
+                    }
+                }else{
+                    $model->is_exist = CollectDataCopy::IS_EXIST_NOT;
+                    $model->is_download = CollectDataCopy::IS_DOWNLOAD_NOT;
+                }
+                $model->json_string = $jsonData;
+                $model->json_data = var_export($result,true);
+                $model->save();
+            }
+        }
+    }
+
+    /**
      * 补充数据
      */
     public function actionRepairData(){
