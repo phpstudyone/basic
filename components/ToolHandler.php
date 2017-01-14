@@ -386,6 +386,20 @@ class ToolHandler {
 		fwrite($downloaded_file, $file_content);
 		fclose($downloaded_file);
 	}
+
+
+	/**
+	 * 下载文件（支持大文件下载）
+	 * @param $file_url
+	 * @param $save_to
+	 */
+	public static function download($file_url,$save_to){
+		$fp_output = fopen($save_to, 'w');
+		$ch = curl_init($file_url);
+		curl_setopt($ch, CURLOPT_FILE, $fp_output);
+		curl_exec($ch);
+		curl_close($ch);
+	}
 	
 	/**
 	 * 创建目录
@@ -434,38 +448,6 @@ class ToolHandler {
 			}
 		}
 		return $arr;
-	}
-
-	//过滤敏感词,直接替换成*
-	public static function Sensitive($string) {
-		$model = \common\models\Config::find()->one();
-		$value = unserialize($model->value);
-		$value = explode(',', $value);
-		$badword = array_combine($value,array_fill(0,count($value),'*'));
-		$str = strtr($string, $badword);
-		return $str;
-	}
-
-	//过滤敏感词，有就true，无就false
-	public static function checkSensitive($string) {
-		$model = \common\models\Config::find()->one();
-		$value = unserialize($model->value);
-		$value = explode(',', $value);
-		//定义子串出现次数
-		$num = 0;
-		//循环检测
-		for($i = 0; $i < count($value); $i ++) {
-			//计算子串在字符串中出现的次数
-			if (substr_count($string, $value[$i]) > 0) {
-				$num ++;
-			}
-		}
-
-		if($num>0){
-			return true;
-		} else {
-			return false;
-		}
 	}
     
 	/**

@@ -43,7 +43,7 @@ class HelloController extends Controller
      */
     public function actionAlmighty(){
         set_time_limit(0);
-        ini_set('memory_limit','1000M');
+        ini_set('memory_limit',-1);
         $count = 14000;             //数据表已有数据的最大id（也可以自定义，看想下载到多少）
         for($id = 1 ; $id <= $count ; $id++){
             $model = CollectDataCopy::findOne(['video_id'=>$id]);
@@ -85,7 +85,7 @@ class HelloController extends Controller
                         $path = $root . '/' . $path  . time() . mt_rand(100,999) . ".". $suffx;
                         $model->video_path = $path;
                         $model->download_begin_time = time();
-                        ToolHandler::download_remote_file_with_curl($Hmp4,$path);
+                        ToolHandler::download($Hmp4,$path);
                         $model->download_end_time = time();
                         $model->is_download = CollectDataCopy::IS_DOWNLOAD_YES;
                     }
@@ -96,6 +96,7 @@ class HelloController extends Controller
                 $model->json_string = $jsonData;
                 $model->json_data = var_export($result,true);
                 $model->save();
+                unset($model);
             }
         }
     }
