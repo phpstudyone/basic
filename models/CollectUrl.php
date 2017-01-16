@@ -52,8 +52,6 @@ class CollectUrl extends \yii\db\ActiveRecord
      */
     const LIST_URL = "http://www.imooc.com/course/list";
 
-    const IMOOC_USERNAME = "845830229@qq.com";
-    const IMOOC_PASSWORD = "zrhyhhxxy";
 
     /**
      * 获取采集状态
