@@ -45,7 +45,7 @@ class HelloController extends Controller
         set_time_limit(0);
         ini_set('memory_limit',-1);
         $count = 14000;             //数据表已有数据的最大id（也可以自定义，看想下载到多少）
-        for($id = 1 ; $id <= $count ; $id++){
+        for($id = 855 ; $id <= $count ; $id++){
             $model = CollectDataCopy::findOne(['video_id'=>$id]);
             if($model && $model->is_download == CollectDataCopy::IS_DOWNLOAD_YES){
                 continue;
