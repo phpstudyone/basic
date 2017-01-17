@@ -191,12 +191,12 @@ where u.email ='".$email."' limit 1;";
     }
     public function actionIndex()
     {
-    header ( "Content-type:text/html;charset=utf-8" );
-    $connection = ssh2_connect('172.16.40.250', 22, array('hostkey'=>'ssh-rsa'));
+        header ( "Content-type:text/html;charset=utf-8" );
+        $connection = ssh2_connect('172.16.40.250', 22, array('hostkey'=>'ssh-rsa'));
 
-    if (ssh2_auth_pubkey_file($connection, 'app',
-                             "C:/wamp/www/basic/web/id_rsa.pub",
-                             "C:/wamp/www/basic/web/App", 'baiyang')) {
+        if (ssh2_auth_pubkey_file($connection, 'app',
+            "C:/wamp/www/basic/web/id_rsa.pub",
+            "C:/wamp/www/basic/web/App", 'baiyang')) {
             echo "连接172.16.40.250:22成功";
             $sftp = ssh2_sftp($connection);
             if(ssh2_scp_recv($connection, '/var/www/html/web/Application/Shop/View/Public/error.html', './error.html')){
@@ -208,8 +208,8 @@ where u.email ='".$email."' limit 1;";
             }
 
         } else {
-        die('Public Key Hostbased Authentication Failed');
-    }die;
+            die('Public Key Hostbased Authentication Failed');
+        }die;
 
 
 
