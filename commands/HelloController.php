@@ -44,7 +44,7 @@ class HelloController extends Controller
     public function actionAlmighty(){
         set_time_limit(0);
         ini_set('memory_limit','1000M');
-        $count = 7;             //数据表已有数据的最大id（也可以自定义，看想下载到多少）
+        $count = 14000;             //数据表已有数据的最大id（也可以自定义，看想下载到多少）
         for($id = 1 ; $id <= $count ; $id++){
             $getVideoUrl = CollectDataCopy::GET_IMOOC_DOWNLOAD . "?mid=". $id . '$mode=falsh';
             $jsonData = CollectDataCopy::getContentByCurl($getVideoUrl);

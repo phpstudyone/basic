@@ -4,8 +4,8 @@
  */
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=192.168.1.102;dbname=twobrightlights',
+    'dsn' => 'mysql:host=172.26.0.91;dbname=twobrightlights',
     'username' => 'root',
-    'password' => '',
+    'password' => '123456',
     'charset' => 'utf8',
 ];

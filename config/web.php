@@ -69,7 +69,7 @@ $config = [
             'autoConnect' => true,
             'dir' => '/var/www/html/web/',
         ],
-        'db' => require(__DIR__ . '/pachong.php'),
+        'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
