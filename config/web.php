@@ -69,6 +69,11 @@ $config = [
             'autoConnect' => true,
             'dir' => '/var/www/html/web/',
         ],
+
+        'ctp' => [
+            'class' => 'app\extensions\ctp\ChineseToPiny',
+        ],
+
         'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [
