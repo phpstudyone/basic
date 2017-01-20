@@ -69,7 +69,12 @@ $config = [
             'autoConnect' => true,
             'dir' => '/var/www/html/web/',
         ],
-        'db' => require(__DIR__ . '/pachong.php'),
+
+        'ctp' => [
+            'class' => 'app\extensions\ctp\ChineseToPiny',
+        ],
+
+        'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
