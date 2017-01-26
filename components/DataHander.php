@@ -9,19 +9,16 @@ use yii;
 class DataHander{
 
     //存储sql语句的文件路径
-    const SQL_FILE_PATH = "/var/www/html/basic/sql.sql";
+//    const SQL_FILE_PATH = "/Applications/XAMPP/htdocs/basic/sql.sql";
+    const SQL_FILE_PATH = "/Applications/XAMPP/htdocs/basic/sql1.sql";
 
     /**
      * 获取数据表所有的表
      * @return array|mixed
      */
     public static function getAllTables(){
-        $allTables = Redis::getCache('allTables');
-        if(!$allTables){
-            $sql = "show tables";
-            $allTables = Yii::$app->db->createCommand($sql)->queryAll();
-            Redis::setCache('allTables',$allTables);
-        }
+        $sql = "show tables";
+        $allTables = Yii::$app->db->createCommand($sql)->queryAll();
         return $allTables;
     }
 
@@ -71,7 +68,7 @@ class DataHander{
                 }
                 $insertSql .= ")";
                 if ($key == $count - 1) $insertSql .= ";\r\n";
-                else $insertSql .= ",";
+                else $insertSql .= ",\r\n";
             }
         }
         return $insertSql;
