@@ -205,3 +205,9 @@ imooc的视频下载地址，可以请求[获取视频地址](http://www.imooc.c
 + 搜索需要，如：输入 “棕子” ， 要求查询的商品包括 “粽子”。我们可以写个脚本，
 把查询的数据表中的商品名，全部转为拼音。同时把用户输入的关键词也转为拼音，此时可以完成匹配。
 + other...
+
+***
+看一本小说，但是网上找不到下载链接，一怒之下写个脚本，把每章节内容写入到文本，自动生成小说
+![SSLProtocol](https://raw.githubusercontent.com/phpstudyOne/basic/develop/commands/GIF2.gif)
+![SSLProtocol](https://raw.githubusercontent.com/phpstudyOne/basic/develop/commands/GIF.gif)
+可以写个脚本，每天读取追更的小说，获取最新章节，推送到关注的公众号~
