@@ -276,8 +276,10 @@ class HelloController extends Controller
             DataHander::writeFile($str);
             echo $str . date('Y-m-d H:i:s');
             $createTableSql = DataHander::getCreateTableSql($tableName);
+            preg_match('/DEFAULT CHARSET=([a-zA-Z0-9]*)/',$createTableSql,$encodrArr);
+            $encode = isset($encodrArr[1]) ? $encodrArr[1] : 'utf8';
             DataHander::writeFile($createTableSql . ';');
-            $insertSql = DataHander::getInsertTableSql($tableName);
+            $insertSql = DataHander::getInsertTableSql($tableName,$encode);
             DataHander::writeFile($insertSql);
             echo "插入".$tableName."数据成功 ".date('Y-m-d H:i:s') ."\r\n";
             array_shift($allTables);
