@@ -3,7 +3,7 @@
 Yii::setAlias('@tests', dirname(__DIR__) . '/tests/codeception');
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 $params = require(__DIR__ . '/params.php');
-$db = require(__DIR__ . '/pachong.php');
+$db = require(__DIR__ . '/db.php');
 
 $config = [
     'id' => 'basic-console',

@@ -9,19 +9,16 @@ use yii;
 class DataHander{
 
     //存储sql语句的文件路径
-    const SQL_FILE_PATH = "/var/www/html/basic/sql.sql";
+//    const SQL_FILE_PATH = "/Applications/XAMPP/htdocs/basic/sql.sql";
+    const SQL_FILE_PATH = "/Applications/XAMPP/htdocs/basic/sql1.sql";
 
     /**
      * 获取数据表所有的表
      * @return array|mixed
      */
     public static function getAllTables(){
-        $allTables = Redis::getCache('allTables');
-        if(!$allTables){
-            $sql = "show tables";
-            $allTables = Yii::$app->db->createCommand($sql)->queryAll();
-            Redis::setCache('allTables',$allTables);
-        }
+        $sql = "show tables";
+        $allTables = Yii::$app->db->createCommand($sql)->queryAll();
         return $allTables;
     }
 
@@ -49,9 +46,10 @@ class DataHander{
     /**
      * 根据表名获取插入数据的sql
      * @param $tableName
+     * @param string $encode
      * @return string
      */
-    public static function getInsertTableSql($tableName){
+    public static function getInsertTableSql($tableName,$encode = 'utf8'){
         $insertSql = "insert into " . $tableName . " values ";
         $sql = "select * from " . $tableName . " limit 500";
         $data = Yii::$app->db->createCommand($sql)->queryAll();
@@ -63,7 +61,7 @@ class DataHander{
                     $i = 0;
                     $valueCount = count($value);
                     foreach ($value as $k => $v) {
-                        $v = addslashes(substr($v, 0, 30));
+                        $v = addslashes(mb_substr($v, 0, 30,$encode));
                         $insertSql .= '"' . $v . '"';
                         $i++;
                         if ($i != $valueCount) $insertSql .= ",";
@@ -71,7 +69,7 @@ class DataHander{
                 }
                 $insertSql .= ")";
                 if ($key == $count - 1) $insertSql .= ";\r\n";
-                else $insertSql .= ",";
+                else $insertSql .= ",\r\n";
             }
         }
         return $insertSql;

@@ -267,23 +267,22 @@ class HelloController extends Controller
      * 数据库导出
      */
     public function actionDataTest(){
+        set_time_limit(0);
+        ini_set('memory_limit',-1);
         $allTables = DataHander::getAllTables();
-        if($allTables && $allTables != 'dataOver'){
+        while(!empty($allTables)){
             $tableName = current($allTables[0]);
             $str = "##新建" . $tableName . "\r\n";
             DataHander::writeFile($str);
             echo $str . date('Y-m-d H:i:s');
             $createTableSql = DataHander::getCreateTableSql($tableName);
+            preg_match('/DEFAULT CHARSET=([a-zA-Z0-9]*)/',$createTableSql,$encodrArr);
+            $encode = isset($encodrArr[1]) ? $encodrArr[1] : 'utf8';
             DataHander::writeFile($createTableSql . ';');
-            $insertSql = DataHander::getInsertTableSql($tableName);
+            $insertSql = DataHander::getInsertTableSql($tableName,$encode);
             DataHander::writeFile($insertSql);
             echo "插入".$tableName."数据成功 ".date('Y-m-d H:i:s') ."\r\n";
             array_shift($allTables);
-            if($allTables)
-                Redis::setCache('allTables',$allTables);
-            else{
-                Redis::setCache('allTables','dataOver');
-            }
         }
     }
 }
