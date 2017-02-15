@@ -50,10 +50,10 @@ class DataHander{
      * @return string
      */
     public static function getInsertTableSql($tableName){
-        $insertSql = "insert into " . $tableName . " values ";
         $sql = "select * from " . $tableName . " limit 500";
         $data = Yii::$app->db->createCommand($sql)->queryAll();
         if ($data) {
+            $insertSql = "insert into " . $tableName . " values ";
             $count = count($data);
             foreach ($data as $key => $value) {
                 $insertSql .= "(";

@@ -276,7 +276,6 @@ class HelloController extends Controller
             DataHander::writeFile($str);
             echo $str . date('Y-m-d H:i:s');
             $createTableSql = DataHander::getCreateTableSql($tableName);
-            preg_match('/DEFAULT CHARSET=([a-zA-Z0-9]*)/',$createTableSql,$encodrArr);
             DataHander::writeFile($createTableSql . ';');
             $insertSql = DataHander::getInsertTableSql($tableName);
             DataHander::writeFile($insertSql);
