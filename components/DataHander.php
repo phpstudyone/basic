@@ -49,11 +49,11 @@ class DataHander{
      * @param string $encode
      * @return string
      */
-    public static function getInsertTableSql($tableName,$encode = 'utf8'){
-        $insertSql = "insert into " . $tableName . " values ";
+    public static function getInsertTableSql($tableName){
         $sql = "select * from " . $tableName . " limit 500";
         $data = Yii::$app->db->createCommand($sql)->queryAll();
         if ($data) {
+            $insertSql = "insert into " . $tableName . " values ";
             $count = count($data);
             foreach ($data as $key => $value) {
                 $insertSql .= "(";
@@ -61,7 +61,7 @@ class DataHander{
                     $i = 0;
                     $valueCount = count($value);
                     foreach ($value as $k => $v) {
-                        $v = addslashes(mb_substr($v, 0, 30,$encode));
+                        $v = addslashes($v);
                         $insertSql .= '"' . $v . '"';
                         $i++;
                         if ($i != $valueCount) $insertSql .= ",";
