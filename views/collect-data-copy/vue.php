@@ -25,6 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <button v-for="list in lists" v-on:click="clickEvent(list.page)">{{list.page}}</button>
 </div>
 <script>
+    var cache = {};
+    var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/result")?>';
     var data = new Vue({
         el:'#data',
         data:{
@@ -53,10 +55,14 @@ new Vue({
     },
     methods:{
         clickEvent:function (page) {
-            url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/result")?>';
-            $.post(url,{page:page},function (res) {
-                data.datas = res;
-            },'json');
+            if(page in cache){
+                data.datas = cache[page];
+            }else{
+                $.post(url,{page:page},function (res) {
+                    data.datas = res;
+                    cache[page] = res;
+                },'json');
+            }
         }
     }
 });
