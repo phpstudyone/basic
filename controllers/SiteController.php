@@ -191,6 +191,46 @@ where u.email ='".$email."' limit 1;";
     }
     public function actionIndex()
     {
+
+        for ($i = 0; $i < 100 ;$i++){
+            sleep(0.1);
+        $mail = new \PHPMailer;
+
+        //$mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+        $mail->isSMTP();                                      // Set mailer to use SMTP
+        $mail->Host = 'smtp.qq.com';  // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true;                               // Enable SMTP authentication
+        $mail->Username = '845830229@qq.com';                 // SMTP username
+        $mail->Password = 'dksbeoiueipvbdjc';                           // SMTP password
+//        $mail->Password = 'qwer1234';                           // 163 邮箱
+        $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+        $mail->Port = 587;                                    // TCP port to connect to
+
+        $mail->setFrom('845830229@qq.com', 'jason');
+        $mail->addAddress('517690962@qq.com', 'jason simil num');     // Add a recipient
+        $mail->addAddress('rihui_best@163.com');               // Name is optional
+        $mail->addCC('810984279');
+        $mail->addBCC('jaszhang@xogrp.com');
+        $mail->isHTML(true);                                  // Set email format to HTML
+
+
+        $mail->AltBody = 'This is the body in plain text for non-HTML mail clients 测试邮件 不用理';
+
+
+    $mail->Subject = 'Here is the subject' . $i;
+    $mail->Body    = 'This is the HTML message body <b>in bold!</b>测试邮件 不用理' . $i;
+    if(!$mail->send()) {
+
+        echo 'Message could not be sent.';
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
+    } else {
+        echo 'Message has been sent';
+    }
+}
+
+
+        die;
         header ( "Content-type:text/html;charset=utf-8" );
         $connection = ssh2_connect('172.16.40.250', 22, array('hostkey'=>'ssh-rsa'));
 

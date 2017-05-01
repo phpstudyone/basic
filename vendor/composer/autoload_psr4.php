@@ -16,5 +16,7 @@ return array(
     'yii\\bootstrap\\' => array($vendorDir . '/yiisoft/yii2-bootstrap'),
     'yii\\' => array($vendorDir . '/yiisoft/yii2'),
     'cebe\\markdown\\' => array($vendorDir . '/cebe/markdown'),
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Symfony\\Component\\VarDumper\\' => array($vendorDir . '/symfony/var-dumper'),
     'Faker\\' => array($vendorDir . '/fzaninotto/faker/src/Faker'),
 );
