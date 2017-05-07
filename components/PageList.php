@@ -23,24 +23,16 @@ class PageList{
             }
         }else{
             for ($i = 2 ; $i < $pageCount  ; $i++){
-                if( $i<3 || $i > ($pageCount - 3) ){
+                if( $i<4 || $i > ($pageCount - 2) ){
                     $data[] = ['no'=> $i, 'is_show'=>$page == $i ? true : false];
                 }else{
                     if($i == $page){
                         if($i-2 > 4){
-                            $jLeft = $i -2;
-                            $jRight = $pageCount - 3;
+                            $jLeft = $i -3;
+                            $jRight = $i + 3;
                         }else{
                             $jLeft = $i;
-                            $jRight = $pageCount - 5;
-                        }
-
-                        if($i + 2 > $pageCount){
-                            $jLeft = $i - 2;
-                            $jRight = $i + 2;
-                        }else{
-                            $jLeft = $i -4;
-                            $jRight = $i;
+                            $jRight = $pageCount - 3;
                         }
                         for ($j = $jLeft ; $j <= $jRight ; $j++){
                             $data[] = ['no'=> $j, 'is_show'=>$page == $j ? true : false];
