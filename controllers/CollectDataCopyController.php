@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\PageList;
 use Yii;
 use app\models\CollectDataCopy;
 use yii\data\ActiveDataProvider;
@@ -31,7 +32,14 @@ class CollectDataCopyController extends Controller
 
     public function actionVue(){
         $page = Yii::$app->request->post('page');
+        $total = CollectDataCopy::find()
+            ->select(['id','title','learn_name','is_exist','is_download'])
+            ->orderBy(['id' => SORT_ASC])
+            ->limit(10)
+            ->offset(($page - 1) * 10)
+            ->count();
         if($page){
+            $list = PageList::lists($total,$page,10);
             $data = CollectDataCopy::find()
                 ->select(['id','title','learn_name','is_exist','is_download'])
                 ->orderBy(['id' => SORT_ASC])
@@ -39,7 +47,7 @@ class CollectDataCopyController extends Controller
                 ->offset(($page - 1) * 10)
                 ->asArray()
                 ->all();
-            echo json_encode($data);die;
+            echo json_encode(['data'=>$data,'list'=>$list]);die;
         }
         return $this->render('vue');
     }
