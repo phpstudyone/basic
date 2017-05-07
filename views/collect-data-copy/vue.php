@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <script>
     var cache = {};
-    var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/result")?>';
+    var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/vue")?>';
 
     var ajaxGetData = function (page) {
         if(page in cache){

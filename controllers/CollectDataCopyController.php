@@ -30,25 +30,18 @@ class CollectDataCopyController extends Controller
     }
 
     public function actionVue(){
-        $data = CollectDataCopy::find()
-            ->select(['id','title','learn_name','is_exist','is_download'])
-            ->orderBy(['id' => SORT_DESC])
-            ->limit(10)
-            ->asArray()
-            ->all();
-        return $this->render('vue',['data'=>$data]);
-    }
-
-    public function actionResult(){
         $page = Yii::$app->request->post('page');
-        $data = CollectDataCopy::find()
-            ->select(['id','title','learn_name','is_exist','is_download'])
-            ->orderBy(['id' => SORT_ASC])
-            ->limit(10)
-            ->offset(($page - 1) * 10)
-            ->asArray()
-            ->all();
-        echo json_encode($data);
+        if($page){
+            $data = CollectDataCopy::find()
+                ->select(['id','title','learn_name','is_exist','is_download'])
+                ->orderBy(['id' => SORT_ASC])
+                ->limit(10)
+                ->offset(($page - 1) * 10)
+                ->asArray()
+                ->all();
+            echo json_encode($data);die;
+        }
+        return $this->render('vue');
     }
 
     /**
