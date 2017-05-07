@@ -74,7 +74,7 @@ $config = [
             'class' => 'app\extensions\ctp\ChineseToPiny',
         ],
 
-        'db' => require(__DIR__ . '/db.php'),
+        'db' => require(__DIR__ . '/pachong.php'),
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,

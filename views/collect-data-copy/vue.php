@@ -1,15 +1,9 @@
 <?php
-
-use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\Pjax;
-/* @var $this yii\web\View */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
 $this->title = Yii::t('app', 'Collect Data Copies');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/vue.resource/1.3.1/vue-resource.min.js"></script>
 <div id="data">
     <table class="table table-striped table-hover">
         <tr v-for="todo in datas">
@@ -27,19 +21,26 @@ $this->params['breadcrumbs'][] = $this->title;
 <script>
     var cache = {};
     var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/result")?>';
+
+    var ajaxGetData = function (page) {
+        if(page in cache){
+            data.datas = cache[page];
+        }else{
+            Vue.http.post(url, {page:page,'<?= Yii::$app->request->csrfParam ?>': '<?= Yii::$app->request->getCsrfToken() ?>'},
+                {'emulateJSON':true}).then(function (res) {
+                data.datas = res.body;
+                cache[page] = res.body;
+            });
+        }
+    };
+
     var data = new Vue({
         el:'#data',
         data:{
-            datas:[
-                <?php foreach ($data as $value):?>
-                {
-                    title: '<?php echo $value["title"]?>' ,
-                    learn_name: '<?php echo $value["learn_name"]?>',
-                    is_exist: '<?php echo $value["is_exist"]?>',
-                    is_download: '<?php echo $value["is_download"]?>'
-                },
-                <?php endforeach;?>
-            ]
+            datas:[]
+        },
+        created:function(){
+            ajaxGetData(25);
         }
     });
 
@@ -47,22 +48,15 @@ new Vue({
     el:'#page',
     data:{
         lists:[
-            {page:1},
-            {page:2},
-            {page:3},
-            {page:4}
+            {page:25},
+            {page:26},
+            {page:27},
+            {page:28}
         ]
     },
     methods:{
         clickEvent:function (page) {
-            if(page in cache){
-                data.datas = cache[page];
-            }else{
-                $.post(url,{page:page},function (res) {
-                    data.datas = res;
-                    cache[page] = res;
-                },'json');
-            }
+            ajaxGetData(page);
         }
     }
 });
