@@ -13,22 +13,20 @@ $this->params['breadcrumbs'][] = $this->title;
             <td>{{todo.is_download}}</td>
         </tr>
     </table>
-</div>
-
-<div id="page">
-    <button v-for="list in lists" v-on:click="clickEvent(list.page)">{{list.page}}</button>
+    <button  v-bind:class="[{ 'btn btn-success': list.is_show ,'btn btn-info': !list.is_show }]" v-for="list in lists" v-on:click="clickEvent(list.no)">{{list.no}}</button>
 </div>
 <script>
     var cache = {};
-    var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/result")?>';
-
+    var url = '<?php echo Yii::$app->urlManager->createUrl("/collect-data-copy/vue")?>';
     var ajaxGetData = function (page) {
         if(page in cache){
-            data.datas = cache[page];
+            data.datas = cache[page].data;
+            data.lists = cache[page].list;
         }else{
             Vue.http.post(url, {page:page,'<?= Yii::$app->request->csrfParam ?>': '<?= Yii::$app->request->getCsrfToken() ?>'},
                 {'emulateJSON':true}).then(function (res) {
-                data.datas = res.body;
+                data.datas = res.body.data;
+                data.lists = res.body.list;
                 cache[page] = res.body;
             });
         }
@@ -37,27 +35,16 @@ $this->params['breadcrumbs'][] = $this->title;
     var data = new Vue({
         el:'#data',
         data:{
-            datas:[]
+            datas:{},
+            lists:{}
         },
         created:function(){
-            ajaxGetData(25);
+            ajaxGetData(45);
+        },
+        methods:{
+            clickEvent:function (page) {
+                ajaxGetData(page);
+            }
         }
     });
-
-new Vue({
-    el:'#page',
-    data:{
-        lists:[
-            {page:25},
-            {page:26},
-            {page:27},
-            {page:28}
-        ]
-    },
-    methods:{
-        clickEvent:function (page) {
-            ajaxGetData(page);
-        }
-    }
-});
 </script>
