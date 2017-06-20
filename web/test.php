@@ -7,6 +7,8 @@
  */
 
 $url = "http://guangdong.circ.gov.cn/tabid/878/ctl/ViewOrganization/mid/6522/ItemID/794615/Default.aspx?ctlmode=none";
+set_time_limit(0);
+ini_set('memory_limit','1000M');
 
 /**
  * 使用CURL方式获取网页内容
@@ -22,8 +24,44 @@ function getContentByCurl($url){
     curl_close($ch);
     return $content;
 }
-set_time_limit(0);
-ini_set('memory_limit','1000M');
+
+$handle = @fopen("./title.txt", "r");
+if ($handle) {
+    while (!feof($handle)) {
+        $buffer = fgets($handle);
+        $arr = explode("\t",$buffer);
+        if(!empty($arr[0])){
+            $array = [];
+            $array['url'] = $arr[0];
+            $array['title'] = $arr[1];
+            preg_match('/\d{6}/',$arr[0],$matchArr);
+            if(!empty($matchArr[0])){
+                $url = 'http://localhost:9200/tbl/album_story/' . $matchArr[0];
+                $data = json_encode($array);
+                putCurl($url,$data);
+            }else continue;
+            $array['id'] = '';
+        }else continue;
+    }
+    fclose($handle);
+}
+function putCurl($url,$data){
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_COOKIESESSION, true);
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, urldecode($data));
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    $result = curl_exec($curl);
+    if (json_decode($result, true)) {
+        $result = json_decode($result, true);
+    } else {
+        $result = json_decode(substr($result, 3), true);
+    }
+}die;
+
 for ($i = 800000; $i >= 1 ; $i--){
     $url = "http://guangdong.circ.gov.cn/tabid/878/ctl/ViewOrganization/mid/6522/ItemID/" .$i . "/Default.aspx?ctlmode=none";
     $content = getContentByCurl($url);

@@ -12,6 +12,7 @@ class PageList{
      * @param int $total 总数
      * @param int $page 当前页数
      * @param int $count 每页显示数
+     * @return array
      */
     public static function lists($total,$page = 1,$count = 10){
         $data = [];
