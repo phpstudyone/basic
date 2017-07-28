@@ -20,7 +20,8 @@
         "yiisoft/yii2-swiftmailer": "*",
         "yiisoft/yii2-redis": "^2.0",
         "symfony/var-dumper": "^3.2",
-        "phpmailer/phpmailer": "^5.2"
+        "phpmailer/phpmailer": "^5.2",
+        "authorizenet/authorizenet": "^1.9"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",
