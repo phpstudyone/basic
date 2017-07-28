@@ -191,7 +191,7 @@ where u.email ='".$email."' limit 1;";
     }
     public function actionIndex()
     {
-
+die;
         for ($i = 0; $i < 100 ;$i++){
             sleep(0.1);
         $mail = new \PHPMailer;
