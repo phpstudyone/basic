@@ -190,7 +190,7 @@ where u.email ='".$email."' limit 1;";
         ],"c:/");die;
     }
     public function actionIndex()
-    {
+    {echo 111;die;
 die;
         for ($i = 0; $i < 100 ;$i++){
             sleep(0.1);

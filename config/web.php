@@ -75,14 +75,14 @@ $config = [
         ],
 
         'db' => require(__DIR__ . '/pachong.php'),
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => false,
             'rules' => [
             ],
         ],
-        */
     ],
     'params' => $params,
 ];
