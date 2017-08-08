@@ -1,7 +1,14 @@
-<form id="send_hptoken" action="https://test.authorize.net/payment/payment" method="post" target="load_payment" >
-    <input type="hidden" name="token" value="<?php echo $token ?>" />
-    <button type="submit">我要升级</button>
+<body onload="func()">
+<form method="post" action="https://test.authorize.net/customer/addPayment" target="add_payment">
+    <input type="hidden" name="token" value="<?php echo $token;?>"/>
+    <input id='submit' type="submit" value="添加支付信息"/>
 </form>
-
-<iframe id="load_payment" class="embed-responsive-item" name="load_payment" width="100%" height="850px" frameborder="0" scrolling="no">
+<iframe id="add_payment" class="embed-responsive-item panel" name="add_payment" width="100%" height="650px" frameborder="0" scrolling="no">
 </iframe>
+</body>
+<script type="application/javascript">
+    function func(){
+        var button = document.getElementById('submit');
+        button.click();
+    }
+</script>

@@ -7,6 +7,15 @@
             var referrer = document.referrer;
             var s = {qstr : str , parent : referrer};
             console.log(s);
+            if(referrer == 'https://test.authorize.net/customer/addPayment'){
+                switch(str){
+                    case 'action=successfulSave' :
+                        window.parent.parent.location.href="https://www.basic.com/authorizenet/payment";
+                        break;
+                }
+            }else if(referrer == 'https://test.authorize.net/payment/payment'){
+
+            }
         }
 
         function receiveMessage(event) {
@@ -22,6 +31,7 @@
         }
 
         if (window.location.hash && window.location.hash.length > 1) {
+            console.log(window.location.hash.substring(1),11111);
             callParentFunction(window.location.hash.substring(1));
         }
 

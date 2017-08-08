@@ -64,29 +64,51 @@ class AuthorizenetController extends Controller{
         </getHostedProfilePageRequest>
      */
     public function actionIndex(){
-        $token = $this->getAnAcceptPaymentPage();
-        return $this->render('index',['token'=>$token]);
-    }
-
-    /**
-     * 获取用户信息的token
-     * @param string $profileID
-     * @return mixed
-     */
-    function getAcceptCustomerProfilePage($profileID = '1810263952'){
-
+        $profileId = \Yii::$app->request->get('profileId');
         $setting = new AnetAPI\SettingType();
-        $setting->setSettingName("hostedProfileReturnUrl");
-        $setting->setSettingValue("https://www.basic.com/index.php?r=authorizenet/return");
+        $setting->setSettingName("hostedProfileIFrameCommunicatorUrl");
+        $url = \Yii::$app->urlManager->createAbsoluteUrl(['authorizenet/special']);
+        $setting->setSettingValue($url);
         $request = new AnetAPI\GetHostedProfilePageRequest();
         $request->setMerchantAuthentication($this->merchantAuthentication);
-        $request->setCustomerProfileId($profileID);
+        $request->setCustomerProfileId($profileId);
         $request->addToHostedProfileSettings($setting);
         $controller = new AnetController\GetHostedProfilePageController($request);
         $response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
-        return $response->getToken();
+        if (($response != null) && ($response->getMessages()->getResultCode() == "Ok") )
+        {
+           $token =  $response->getToken();
+        }else $token = '';
+        return $this->render('index',['token'=>$token]);
     }
 
+    public function actionPayment(){
+        $token = $this->getAnAcceptPaymentPage();
+        return $this->render('payment',['token'=>$token]);
+    }
+
+    public function actionSignup(){
+        $post = \Yii::$app->request->post();
+        if(!empty($post['email'])){
+            $customerProfile = new AnetAPI\CustomerProfileType();
+            $customerProfile->setDescription("Customer 2 Test PHP");
+            $customerProfile->setMerchantCustomerId('11211');
+            $customerProfile->setEmail($post['email']);
+            $request = new AnetAPI\CreateCustomerProfileRequest();
+            $request->setMerchantAuthentication($this->merchantAuthentication);
+            $request->setProfile($customerProfile);
+            $controller = new AnetController\CreateCustomerProfileController($request);
+            $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+            if (($response != null) && ($response->getMessages()->getResultCode() == "Ok")) {
+                $profileId = $response->getCustomerProfileId();
+                \Yii::$app->session->set('user_id','11211');
+                \Yii::$app->session->set('profileId',$profileId);
+                \Yii::$app->session->set('email',$post['email']);
+                $this->redirect(['authorizenet/index','profileId'=>$profileId]);
+            }
+        }
+        return $this->render('signup');
+    }
 
     /**
      * 获取托管表单所需的token
@@ -97,17 +119,17 @@ class AuthorizenetController extends Controller{
         $transactionRequestType = new AnetAPI\TransactionRequestType();
         $transactionRequestType->setTransactionType("authCaptureTransaction");
         $transactionRequestType->setAmount("12.23");
-        $customer = $this->getCustomerProfile(1810263952);
-        $billTo = $customer->getProfile()->getPaymentProfiles()[0]->getBillTo();
+        $customer = $this->getCustomerProfile(\Yii::$app->session->get('profileId'));
+        $billTo = end($customer->getProfile()->getPaymentProfiles())->getBillTo();
+
         $transactionRequestType->setBillTo($billTo);
         $customer = new AnetAPI\CustomerDataType();
-        $customer->setEmail('845830229@qq.com');
-        $customer->setId('11211');
+        $customer->setEmail(\Yii::$app->session->get('email'));
+        $customer->setId(\Yii::$app->session->get('user_id'));
         $transactionRequestType->setCustomer($customer);
 
         $request = new AnetAPI\GetHostedPaymentPageRequest();
         $request->setMerchantAuthentication($this->merchantAuthentication);
-        $request->setRefId('111');
         $request->setTransactionRequest($transactionRequestType);
         $setting3 = new AnetAPI\SettingType();
         $setting3->setSettingName("hostedPaymentReturnOptions");
@@ -127,7 +149,7 @@ class AuthorizenetController extends Controller{
 
         $setting6 = new AnetAPI\SettingType();
         $setting6->setSettingName('hostedPaymentIFrameCommunicatorUrl');
-        $url = \Yii::$app->urlManager->createAbsoluteUrl(['authorizenet/special#profileID=1810263952#userID=11211#type=1']);
+        $url = \Yii::$app->urlManager->createAbsoluteUrl(['authorizenet/special']);
         $setting6->setSettingValue("{\"url\": \"".$url."\"}");
         $request->addToHostedPaymentSettings($setting6);
         $controller = new AnetController\GetHostedPaymentPageController($request);
