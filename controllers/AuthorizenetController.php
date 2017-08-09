@@ -82,6 +82,74 @@ class AuthorizenetController extends Controller{
         return $this->render('index',['token'=>$token]);
     }
 
+    /**
+     * 加载authorizenet托管表单，无法回填信用卡信息，用户需要输入两次账号、过期时间、安全码。体验不好
+     * 改为通过customerProfileId 扣款
+     */
+    public function actionPaymentForApi(){
+        $profileid = 1810263952;
+        $paymentprofileid = $this->getCustomerProfile($profileid);
+        $profileToCharge = new AnetAPI\CustomerProfilePaymentType();
+        $profileToCharge->setCustomerProfileId($profileid);
+        $paymentProfile = new AnetAPI\PaymentProfileType();
+        $paymentProfile->setPaymentProfileId($paymentprofileid);
+        $profileToCharge->setPaymentProfile($paymentProfile);
+
+        $transactionRequestType = new AnetAPI\TransactionRequestType();
+        $transactionRequestType->setTransactionType( "authCaptureTransaction");
+        $transactionRequestType->setAmount(5);
+        $transactionRequestType->setProfile($profileToCharge);
+
+        $request = new AnetAPI\CreateTransactionRequest();
+        $request->setMerchantAuthentication($this->merchantAuthentication);
+        $request->setTransactionRequest( $transactionRequestType);
+        $controller = new AnetController\CreateTransactionController($request);
+        $response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
+
+        echo "<pre>";
+        var_dump($response);die;
+        if ($response != null) {
+            if($response->getMessages()->getResultCode() == \SampleCode\Constants::RESPONSE_OK) {
+                $tresponse = $response->getTransactionResponse();
+
+                if ($tresponse != null && $tresponse->getMessages() != null) {
+                    echo " Transaction Response code : " . $tresponse->getResponseCode() . "\n";
+                    echo  "Charge Customer Profile APPROVED  :" . "\n";
+                    echo " Charge Customer Profile AUTH CODE : " . $tresponse->getAuthCode() . "\n";
+                    echo " Charge Customer Profile TRANS ID  : " . $tresponse->getTransId() . "\n";
+                    echo " Code : " . $tresponse->getMessages()[0]->getCode() . "\n";
+                    echo " Description : " . $tresponse->getMessages()[0]->getDescription() . "\n";
+                } else {
+                    echo "Transaction Failed \n";
+                    if($tresponse->getErrors() != null)
+                    {
+                        echo " Error code  : " . $tresponse->getErrors()[0]->getErrorCode() . "\n";
+                        echo " Error message : " . $tresponse->getErrors()[0]->getErrorText() . "\n";
+                    }
+                }
+            } else {
+                echo "Transaction Failed \n";
+                $tresponse = $response->getTransactionResponse();
+                if($tresponse != null && $tresponse->getErrors() != null)
+                {
+                    echo " Error code  : " . $tresponse->getErrors()[0]->getErrorCode() . "\n";
+                    echo " Error message : " . $tresponse->getErrors()[0]->getErrorText() . "\n";
+                } else {
+                    echo " Error code  : " . $response->getMessages()->getMessage()[0]->getCode() . "\n";
+                    echo " Error message : " . $response->getMessages()->getMessage()[0]->getText() . "\n";
+                }
+            }
+        } else {
+            echo  "No response returned \n";
+        }
+
+        return $response;
+    }
+
+    /**
+     * 加载authorizenet托管表单发起扣款
+     * @return string
+     */
     public function actionPayment(){
         $token = $this->getAnAcceptPaymentPage();
         return $this->render('payment',['token'=>$token]);
@@ -111,7 +179,7 @@ class AuthorizenetController extends Controller{
     }
 
     /**
-     * 获取托管表单所需的token
+     * 获取扣款托管表单所需的token
      * @return mixed
      */
     function getAnAcceptPaymentPage()
@@ -196,7 +264,7 @@ class AuthorizenetController extends Controller{
         $response = $controller->executeWithApiResponse( \net\authorize\api\constants\ANetEnvironment::SANDBOX);
         if (($response != null) && ($response->getMessages()->getResultCode() == "Ok") )
         {
-            return $response;
+//            return $response;
             $profileSelected = $response->getProfile();
             $paymentProfilesSelected = $profileSelected->getPaymentProfiles();
             $paymentProfilesID = $paymentProfilesSelected[0]->getCustomerPaymentProfileId();
